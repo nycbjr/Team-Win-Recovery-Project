@@ -18,8 +18,9 @@
 #include <string>
 
 extern "C" {
-#include "../twcommon.h"
+#include "../common.h"
 #include "../minuitwrp/minui.h"
+#include "../recovery_ui.h"
 #include "../variables.h"
 }
 

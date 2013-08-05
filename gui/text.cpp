@@ -18,8 +18,9 @@
 #include <string>
 
 extern "C" {
-#include "../twcommon.h"
+#include "../common.h"
 #include "../minuitwrp/minui.h"
+#include "../recovery_ui.h"
 }
 
 #include "rapidxml.hpp"
@@ -37,29 +38,18 @@ GUIText::GUIText(xml_node<>* node)
     mFontHeight = 0;
 	maxWidth = 0;
 	charSkip = 0;
-	isHighlighted = false;
-	hasHighlightColor = false;
 
     if (!node)      return;
 
     // Initialize color to solid black
     memset(&mColor, 0, sizeof(COLOR));
     mColor.alpha = 255;
-	memset(&mHighlightColor, 0, sizeof(COLOR));
-    mHighlightColor.alpha = 255;
 
     attr = node->first_attribute("color");
     if (attr)
     {
         std::string color = attr->value();
         ConvertStrToColor(color, &mColor);
-    }
-	attr = node->first_attribute("highlightcolor");
-    if (attr)
-    {
-        std::string color = attr->value();
-		ConvertStrToColor(color, &mHighlightColor);
-		hasHighlightColor = true;
     }
 
     // Load the font, and possibly override the color
@@ -75,14 +65,6 @@ GUIText::GUIText(xml_node<>* node)
         {
             std::string color = attr->value();
             ConvertStrToColor(color, &mColor);
-        }
-
-		attr = child->first_attribute("highlightcolor");
-        if (attr)
-        {
-            std::string color = attr->value();
-			ConvertStrToColor(color, &mHighlightColor);
-			hasHighlightColor = true;
         }
     }
 
@@ -135,10 +117,7 @@ int GUIText::Render(void)
             y -= mFontHeight;
     }
 
-    if (hasHighlightColor && isHighlighted)
-		gr_color(mHighlightColor.red, mHighlightColor.green, mHighlightColor.blue, mHighlightColor.alpha);
-	else
-		gr_color(mColor.red, mColor.green, mColor.blue, mColor.alpha);
+    gr_color(mColor.red, mColor.green, mColor.blue, mColor.alpha);
 
 	if (maxWidth)
 		gr_textExW(x, y, displayValue.c_str(), fontResource, maxWidth + x);
@@ -164,10 +143,7 @@ int GUIText::Update(void)
     if (mIsStatic || !mVarChanged)      return 0;
 
     std::string newValue = parseText();
-    if (mLastValue == newValue)
-		return 0;
-	else
-		mLastValue = newValue;
+    if (mLastValue == newValue)         return 0;
     return 2;
 }
 
@@ -178,7 +154,6 @@ int GUIText::GetCurrentBounds(int& w, int& h)
     if (mFont)  fontResource = mFont->GetResource();
 
     h = mFontHeight;
-	mLastValue = parseText();
     w = gr_measureEx(mLastValue.c_str(), fontResource);
     return 0;
 }

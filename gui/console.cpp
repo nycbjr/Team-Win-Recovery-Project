@@ -18,8 +18,9 @@
 #include <string>
 
 extern "C" {
-#include "../twcommon.h"
+#include "../common.h"
 #include "../minuitwrp/minui.h"
+#include "../recovery_ui.h"
 }
 
 #include "rapidxml.hpp"
@@ -36,8 +37,6 @@ extern "C" void gui_print(const char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(buf, 512, fmt, ap);
     va_end(ap);
-
-	fputs(buf, stdout);
 
     char *start, *next;
 
@@ -75,8 +74,6 @@ extern "C" void gui_print_overwrite(const char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(buf, 512, fmt, ap);
     va_end(ap);
-
-	fputs(buf, stdout);
 
     // Pop the last line, and we can continue
     if (!gConsole.empty())   gConsole.pop_back();
@@ -274,7 +271,6 @@ int GUIConsole::Update(void)
     {
         // They're still touching, so re-render
         Render();
-        mLastTouchY = -1;
         return 2;
     }
     return 0;
@@ -366,7 +362,7 @@ int GUIConsole::NotifyTouch(TOUCH_STATE state, int x, int y)
         {
             mLastTouchY = y;
             if (mCurrentLine == -1)
-                mCurrentLine = mLastCount - 1;
+                mCurrentLine = mLastCount - mMaxRows;
             else if (mCurrentLine > mSlideMultiplier)
                 mCurrentLine -= mSlideMultiplier;
             else

@@ -27,7 +27,7 @@ int gr_fb_width(void);
 int gr_fb_height(void);
 gr_pixel *gr_fb_data(void);
 void gr_flip(void);
-int gr_fb_blank(int blank);
+void gr_fb_blank(int blank);
 
 void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void gr_fill(int x, int y, int w, int h);
@@ -35,7 +35,6 @@ void gr_fill(int x, int y, int w, int h);
 int gr_textEx(int x, int y, const char *s, void* font);
 int gr_textExW(int x, int y, const char *s, void* font, int max_width);
 int gr_textExWH(int x, int y, const char *s, void* pFont, int max_width, int max_height);
-int twgr_text(int x, int y, const char *s);
 static inline int gr_text(int x, int y, const char *s)     { return gr_textEx(x, y, s, NULL); }
 int gr_measureEx(const char *s, void* font);
 static inline int gr_measure(const char *s)                { return gr_measureEx(s, NULL); }
@@ -64,10 +63,5 @@ int ev_get(struct input_event *ev, unsigned dont_wait);
 // Returns 0 if no error, else negative.
 int res_create_surface(const char* name, gr_surface* pSurface);
 void res_free_surface(gr_surface surface);
-
-// Needed for AOSP:
-int ev_wait(int timeout);
-void ev_dispatch(void);
-int ev_get_input(int fd, short revents, struct input_event *ev);
 
 #endif

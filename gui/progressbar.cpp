@@ -18,8 +18,9 @@
 #include <string>
 
 extern "C" {
-#include "../twcommon.h"
+#include "../common.h"
 #include "../minuitwrp/minui.h"
+#include "../recovery_ui.h"
 }
 
 #include "rapidxml.hpp"
@@ -38,7 +39,7 @@ GUIProgressBar::GUIProgressBar(xml_node<>* node)
 
     if (!node)
     {
-        LOGERR("GUIProgressBar created without XML node\n");
+        LOGE("GUIProgressBar created without XML node\n");
         return;
     }
 

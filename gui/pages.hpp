@@ -1,7 +1,7 @@
 // pages.hpp - Base classes for page manager of GUI
 
-#ifndef _PAGES_HEADER_HPP
-#define _PAGES_HEADER_HPP
+#ifndef _PAGES_HEADER
+#define _PAGES_HEADER
 
 typedef struct {
     unsigned char red;
@@ -133,4 +133,5 @@ protected:
 	static PageSet* mBaseSet;
 };
 
-#endif  // _PAGES_HEADER_HPP
+#endif  // _PAGES_HEADER
+

@@ -1745,10 +1745,8 @@ namespace rapidxml
                 // Skip until end of declaration
                 while (text[0] != Ch('?') || text[1] != Ch('>'))
                 {
-                    if (!text[0]) {
+                    if (!text[0])
                         RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-						return 0;
-					}
                     ++text;
                 }
                 text += 2;    // Skip '?>'
@@ -1782,10 +1780,8 @@ namespace rapidxml
                 // Skip until end of comment
                 while (text[0] != Ch('-') || text[1] != Ch('-') || text[2] != Ch('>'))
                 {
-                    if (!text[0]) {
+                    if (!text[0])
                         RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-						return 0;
-					}
                     ++text;
                 }
                 text += 3;     // Skip '-->'
@@ -1798,10 +1794,8 @@ namespace rapidxml
             // Skip until end of comment
             while (text[0] != Ch('-') || text[1] != Ch('-') || text[2] != Ch('>'))
             {
-                if (!text[0]) {
+                if (!text[0])
                     RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-					return 0;
-				}
                 ++text;
             }
 
@@ -1843,7 +1837,7 @@ namespace rapidxml
                         {
                             case Ch('['): ++depth; break;
                             case Ch(']'): --depth; break;
-                            case 0: RAPIDXML_PARSE_ERROR("unexpected end of data", text); return 0;
+                            case 0: RAPIDXML_PARSE_ERROR("unexpected end of data", text);
                         }
                         ++text;
                     }
@@ -1853,7 +1847,6 @@ namespace rapidxml
                 // Error on end of text
                 case Ch('\0'):
                     RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-					return 0;
                 
                 // Other character, skip it
                 default:
@@ -1910,10 +1903,8 @@ namespace rapidxml
                 // Skip to '?>'
                 while (text[0] != Ch('?') || text[1] != Ch('>'))
                 {
-                    if (*text == Ch('\0')) {
+                    if (*text == Ch('\0'))
                         RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-						return 0;
-					}
                     ++text;
                 }
 
@@ -1935,10 +1926,8 @@ namespace rapidxml
                 // Skip to '?>'
                 while (text[0] != Ch('?') || text[1] != Ch('>'))
                 {
-                    if (*text == Ch('\0')) {
+                    if (*text == Ch('\0'))
                         RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-						return 0;
-					}
                     ++text;
                 }
                 text += 2;    // Skip '?>'
@@ -2016,10 +2005,8 @@ namespace rapidxml
                 // Skip until end of cdata
                 while (text[0] != Ch(']') || text[1] != Ch(']') || text[2] != Ch('>'))
                 {
-                    if (!text[0]) {
+                    if (!text[0])
                         RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-						return 0;
-					}
                     ++text;
                 }
                 text += 3;      // Skip ]]>
@@ -2030,10 +2017,8 @@ namespace rapidxml
             Ch *value = text;
             while (text[0] != Ch(']') || text[1] != Ch(']') || text[2] != Ch('>'))
             {
-                if (!text[0]) {
+                if (!text[0])
                     RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-					return 0;
-				}
                 ++text;
             }
 
@@ -2169,10 +2154,8 @@ namespace rapidxml
                 ++text;     // Skip !
                 while (*text != Ch('>'))
                 {
-                    if (*text == 0) {
+                    if (*text == 0)
                         RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-						return 0;
-					}
                     ++text;
                 }
                 ++text;     // Skip '>'
@@ -2241,7 +2224,6 @@ namespace rapidxml
                 // End of data - error
                 case Ch('\0'):
                     RAPIDXML_PARSE_ERROR("unexpected end of data", text);
-					return;
 
                 // Data node
                 default:

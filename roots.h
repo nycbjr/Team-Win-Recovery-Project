@@ -19,15 +19,14 @@
 
 #include "common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Load and parse volume data from /etc/recovery.fstab.
 void load_volume_table();
 
 // Return the Volume* record for this path (or NULL).
 Volume* volume_for_path(const char* path);
+
+// Return the Volume* record for this device (or NULL).
+Volume* volume_for_device(const char* device);
 
 // Make sure that the volume 'path' is on is mounted.  Returns 0 on
 // success (volume is mounted).
@@ -37,13 +36,14 @@ int ensure_path_mounted(const char* path);
 // success (volume is unmounted);
 int ensure_path_unmounted(const char* path);
 
+int mount_current_storage(void);
+int unmount_current_storage(void);
+int mount_internal_storage(void);
+int unmount_internal_storage(void);
+
 // Reformat the given volume (must be the mount point only, eg
 // "/cache"), no paths permitted.  Attempts to unmount the volume if
 // it is mounted.
 int format_volume(const char* volume);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  // RECOVERY_ROOTS_H_
