@@ -19,10 +19,18 @@
 
 #include "mincrypt/rsa.h"
 
+#define ASSUMED_UPDATE_BINARY_NAME  "META-INF/com/google/android/update-binary"
+
+enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT };
+
+static const float VERIFICATION_PROGRESS_FRACTION = 0.25;
+
 /* Look in the file for a signature footer, and verify that it
  * matches one of the given keys.  Return one of the constants below.
  */
-int verify_file(const char* path, const RSAPublicKey *pKeys, unsigned int numKeys);
+int verify_file(const char* path);
+
+RSAPublicKey* load_keys(const char* filename, int* numKeys);
 
 #define VERIFY_SUCCESS        0
 #define VERIFY_FAILURE        1

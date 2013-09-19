@@ -18,8 +18,22 @@
 #define RECOVERY_INSTALL_H_
 
 #include "common.h"
+#include "mincrypt/rsa.h"
 
-enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT };
-int install_package(const char *root_path);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT, INSTALL_NONE };
+// Install the package specified by root_path.  If INSTALL_SUCCESS is
+// returned and *wipe_cache is true on exit, caller should wipe the
+// cache partition.
+int install_package(const char *root_path, int* wipe_cache,
+                    const char* install_file);
+RSAPublicKey* load_keys(const char* filename, int* numKeys);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // RECOVERY_INSTALL_H_

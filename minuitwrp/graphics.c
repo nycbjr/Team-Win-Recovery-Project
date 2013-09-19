@@ -51,6 +51,8 @@
 #define PIXEL_SIZE 2
 #endif
 
+#define NUM_BUFFERS 2
+
 // #define PRINT_SCREENINFO 1 // Enables printing of screen info to log
 
 typedef struct {
@@ -63,9 +65,10 @@ typedef struct {
 static GRFont *gr_font = 0;
 static GGLContext *gr_context = 0;
 static GGLSurface gr_font_texture;
-static GGLSurface gr_framebuffer[2];
+static GGLSurface gr_framebuffer[NUM_BUFFERS];
 static GGLSurface gr_mem_surface;
 static unsigned gr_active_fb = 0;
+static unsigned double_buffering = 0;
 
 static int gr_fb_fd = -1;
 static int gr_vt_fd = -1;
@@ -76,14 +79,14 @@ static struct fb_fix_screeninfo fi;
 #ifdef PRINT_SCREENINFO
 static void print_fb_var_screeninfo()
 {
-	LOGI("vi.xres: %d\n", vi.xres);
-	LOGI("vi.yres: %d\n", vi.yres);
-	LOGI("vi.xres_virtual: %d\n", vi.xres_virtual);
-	LOGI("vi.yres_virtual: %d\n", vi.yres_virtual);
-	LOGI("vi.xoffset: %d\n", vi.xoffset);
-	LOGI("vi.yoffset: %d\n", vi.yoffset);
-	LOGI("vi.bits_per_pixel: %d\n", vi.bits_per_pixel);
-	LOGI("vi.grayscale: %d\n", vi.grayscale);
+	printf("vi.xres: %d\n", vi.xres);
+	printf("vi.yres: %d\n", vi.yres);
+	printf("vi.xres_virtual: %d\n", vi.xres_virtual);
+	printf("vi.yres_virtual: %d\n", vi.yres_virtual);
+	printf("vi.xoffset: %d\n", vi.xoffset);
+	printf("vi.yoffset: %d\n", vi.yoffset);
+	printf("vi.bits_per_pixel: %d\n", vi.bits_per_pixel);
+	printf("vi.grayscale: %d\n", vi.grayscale);
 }
 #endif
 
@@ -188,7 +191,7 @@ static int get_framebuffer(GGLSurface *fb)
     fb->width = vi.xres;
     fb->height = vi.yres;
 #ifdef BOARD_HAS_JANKY_BACKBUFFER
-    LOGI("setting JANKY BACKBUFFER\n");
+    printf("setting JANKY BACKBUFFER\n");
     fb->stride = fi.line_length/2;
 #else
     fb->stride = vi.xres_virtual;
@@ -198,6 +201,12 @@ static int get_framebuffer(GGLSurface *fb)
     memset(fb->data, 0, vi.yres * fb->stride * PIXEL_SIZE);
 
     fb++;
+
+    /* check if we can use double buffering */
+    if (vi.yres * fi.line_length * 2 > fi.smem_len)
+        return fd;
+
+    double_buffering = 1;
 
     fb->version = sizeof(*fb);
     fb->width = vi.xres;
@@ -230,8 +239,8 @@ static void get_memory_surface(GGLSurface* ms) {
 
 static void set_active_framebuffer(unsigned n)
 {
-    if (n > 1) return;
-    vi.yres_virtual = vi.yres * 2;
+    if (n > 1  || !double_buffering) return;
+    vi.yres_virtual = vi.yres * NUM_BUFFERS;
     vi.yoffset = n * vi.yres;
 //    vi.bits_per_pixel = PIXEL_SIZE * 8;
     if (ioctl(gr_fb_fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
@@ -244,15 +253,20 @@ void gr_flip(void)
     GGLContext *gl = gr_context;
 
     /* swap front and back buffers */
-    gr_active_fb = (gr_active_fb + 1) & 1;
+    if (double_buffering)
+        gr_active_fb = (gr_active_fb + 1) & 1;
 
 #ifdef BOARD_HAS_FLIPPED_SCREEN
     /* flip buffer 180 degrees for devices with physicaly inverted screens */
     unsigned int i;
-    for (i = 1; i < (vi.xres * vi.yres); i++) {
-        unsigned short tmp = gr_mem_surface.data[i];
-        gr_mem_surface.data[i] = gr_mem_surface.data[(vi.xres * vi.yres * 2) - i];
-        gr_mem_surface.data[(vi.xres * vi.yres * 2) - i] = tmp;
+    unsigned int j;
+    uint8_t tmp;
+    for (i = 0; i < ((vi.xres_virtual * vi.yres)/2); i++) {
+	for (j = 0; j < PIXEL_SIZE; j++) {
+		tmp = gr_mem_surface.data[i * PIXEL_SIZE + j];
+		gr_mem_surface.data[i * PIXEL_SIZE + j] = gr_mem_surface.data[(vi.xres_virtual * vi.yres * PIXEL_SIZE) - ((i+1) * PIXEL_SIZE) + j];
+		gr_mem_surface.data[(vi.xres_virtual * vi.yres * PIXEL_SIZE) - ((i+1) * PIXEL_SIZE) + j] = tmp;
+	}
     }
 #endif
 
@@ -402,7 +416,7 @@ int gr_textExWH(int x, int y, const char *s, void* pFont, int max_width, int max
 				rect_x = x + cwidth;
 			else
 				rect_x = max_width;
-			if (y + font->cheight < max_height)
+			if (y + font->cheight < (unsigned int)(max_height))
 				rect_y = y + font->cheight;
 			else
 				rect_y = max_height;
@@ -413,6 +427,34 @@ int gr_textExWH(int x, int y, const char *s, void* pFont, int max_width, int max
 			if (x > max_width)
 				return x;
         }
+    }
+
+    return x;
+}
+
+int twgr_text(int x, int y, const char *s)
+{
+    GGLContext *gl = gr_context;
+    GRFont *font = gr_font;
+    unsigned off;
+    unsigned cwidth = 0;
+
+    y -= font->ascent;
+
+    gl->bindTexture(gl, &font->texture);
+    gl->texEnvi(gl, GGL_TEXTURE_ENV, GGL_TEXTURE_ENV_MODE, GGL_REPLACE);
+    gl->texGeni(gl, GGL_S, GGL_TEXTURE_GEN_MODE, GGL_ONE_TO_ONE);
+    gl->texGeni(gl, GGL_T, GGL_TEXTURE_GEN_MODE, GGL_ONE_TO_ONE);
+    gl->enable(gl, GGL_TEXTURE_2D);
+
+    while((off = *s++)) {
+        off -= 32;
+        if (off < 96) {
+            cwidth = font->offset[off+1] - font->offset[off];
+            gl->texCoord2i(gl, (off * cwidth) - x, 0 - y);
+            gl->recti(gl, x, y, x + cwidth, y + font->cheight);
+        }
+        x += cwidth;
     }
 
     return x;
@@ -647,13 +689,14 @@ gr_pixel *gr_fb_data(void)
     return (unsigned short *) gr_mem_surface.data;
 }
 
-void gr_fb_blank(int blank)
+int gr_fb_blank(int blank)
 {
     int ret;
 
     ret = ioctl(gr_fb_fd, FBIOBLANK, blank ? FB_BLANK_POWERDOWN : FB_BLANK_UNBLANK);
     if (ret < 0)
         perror("ioctl(): blank");
+	return ret;
 }
 
 int gr_get_surface(gr_surface* surface)

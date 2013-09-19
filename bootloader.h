@@ -17,6 +17,10 @@
 #ifndef _RECOVERY_BOOTLOADER_H
 #define _RECOVERY_BOOTLOADER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Bootloader Message
  *
  * This structure describes the content of a block in flash
@@ -44,16 +48,23 @@ struct bootloader_message {
 /* Read and write the bootloader command from the "misc" partition.
  * These return zero on success.
  */
+/*
 int get_bootloader_message(struct bootloader_message *out);
 int set_bootloader_message(const struct bootloader_message *in);
+*/
 
-/* Write an update to the cache partition for update-radio or update-hboot.
- * Note, this destroys any filesystem on the cache partition!
- * The expected bitmap format is 240x320, 16bpp (2Bpp), RGB 5:6:5.
- */
-int write_update_for_bootloader(
-        const char *update, int update_len,
-        int bitmap_width, int bitmap_height, int bitmap_bpp,
-        const char *busy_bitmap, const char *error_bitmap);
+void set_device_type(char new_type);
+void set_device_name(const char* new_name);
+
+int get_bootloader_message_mtd_name(struct bootloader_message *out);
+int set_bootloader_message_mtd_name(const struct bootloader_message *in, const char* mtd_name);
+int get_bootloader_message_block_name(struct bootloader_message *out);
+int set_bootloader_message_block_name(const struct bootloader_message *in, const char* block_name);
+
+void get_args(int *argc, char ***argv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

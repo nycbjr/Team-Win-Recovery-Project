@@ -14,8 +14,13 @@
 #include "mincrypt/rsa.h"
 #include "mincrypt/sha.h"
 #include "minui/minui.h"
+#ifdef HAVE_SELINUX
 #include "minzip/SysUtil.h"
 #include "minzip/Zip.h"
+#else
+#include "minzipold/SysUtil.h"
+#include "minzipold/Zip.h"
+#endif
 #include "mtdutils/mounts.h"
 #include "mtdutils/mtdutils.h"
 #include "verifier.h"
@@ -55,12 +60,43 @@ static int Run_Update_Binary(const char *path, ZipArchive *Zip, int* wipe_cache)
 
 	ret_val = mzExtractZipEntryToFile(Zip, binary_location, binary_fd);
 	close(binary_fd);
-	mzCloseZipArchive(Zip);
 
 	if (!ret_val) {
+		mzCloseZipArchive(Zip);
 		LOGERR("Could not extract '%s'\n", ASSUMED_UPDATE_BINARY_NAME);
 		return INSTALL_ERROR;
 	}
+
+	// If exists, extract file_contexts from the zip file
+	const ZipEntry* selinx_contexts = mzFindZipEntry(Zip, "file_contexts");
+	if (selinx_contexts == NULL) {
+		mzCloseZipArchive(Zip);
+		LOGINFO("Zip does not contain SELinux file_contexts file in its root.\n");
+	} else {
+		string output_filename = "/file_contexts";
+		LOGINFO("Zip contains SELinux file_contexts file in its root. Extracting to %s\n", output_filename.c_str());
+		// Delete any file_contexts
+		if (TWFunc::Path_Exists(output_filename) && unlink(output_filename.c_str()) != 0) {
+			LOGINFO("Unable to unlink '%s'\n", output_filename.c_str());
+		}
+
+		int file_contexts_fd = creat(output_filename.c_str(), 0644);
+		if (file_contexts_fd < 0) {
+			mzCloseZipArchive(Zip);
+			LOGERR("Could not extract file_contexts to '%s'\n", output_filename.c_str());
+			return INSTALL_ERROR;
+		}
+
+		ret_val = mzExtractZipEntryToFile(Zip, selinx_contexts, file_contexts_fd);
+		close(file_contexts_fd);
+
+		if (!ret_val) {
+			mzCloseZipArchive(Zip);
+			LOGERR("Could not extract '%s'\n", ASSUMED_UPDATE_BINARY_NAME);
+			return INSTALL_ERROR;
+		}
+	}
+	mzCloseZipArchive(Zip);
 
 	pipe(pipe_fd);
 
@@ -87,37 +123,37 @@ static int Run_Update_Binary(const char *path, ZipArchive *Zip, int* wipe_cache)
 	child_data = fdopen(pipe_fd[0], "r");
 	while (fgets(buffer, sizeof(buffer), child_data) != NULL) {
 		char* command = strtok(buffer, " \n");
-        if (command == NULL) {
-            continue;
-        } else if (strcmp(command, "progress") == 0) {
-            char* fraction_char = strtok(NULL, " \n");
-            char* seconds_char = strtok(NULL, " \n");
+		if (command == NULL) {
+			continue;
+		} else if (strcmp(command, "progress") == 0) {
+			char* fraction_char = strtok(NULL, " \n");
+			char* seconds_char = strtok(NULL, " \n");
 
-            float fraction_float = strtof(fraction_char, NULL);
-            int seconds_float = strtol(seconds_char, NULL, 10);
+			float fraction_float = strtof(fraction_char, NULL);
+			int seconds_float = strtol(seconds_char, NULL, 10);
 
-            if (zip_verify)
+			if (zip_verify)
 				DataManager::ShowProgress(fraction_float * (1 - VERIFICATION_PROGRESS_FRACTION), seconds_float);
 			else
 				DataManager::ShowProgress(fraction_float, seconds_float);
-        } else if (strcmp(command, "set_progress") == 0) {
-            char* fraction_char = strtok(NULL, " \n");
-            float fraction_float = strtof(fraction_char, NULL);
-            DataManager::SetProgress(fraction_float);
-        } else if (strcmp(command, "ui_print") == 0) {
-            char* display_value = strtok(NULL, "\n");
-            if (display_value) {
-                gui_print("%s", display_value);
-            } else {
-                gui_print("\n");
-            }
-        } else if (strcmp(command, "wipe_cache") == 0) {
-            *wipe_cache = 1;
-        } else if (strcmp(command, "clear_display") == 0) {
-            // Do nothing, not supported by TWRP
-        } else {
-            LOGERR("unknown command [%s]\n", command);
-        }
+		} else if (strcmp(command, "set_progress") == 0) {
+			char* fraction_char = strtok(NULL, " \n");
+			float fraction_float = strtof(fraction_char, NULL);
+			DataManager::SetProgress(fraction_float);
+		} else if (strcmp(command, "ui_print") == 0) {
+			char* display_value = strtok(NULL, "\n");
+			if (display_value) {
+				gui_print("%s", display_value);
+			} else {
+				gui_print("\n");
+			}
+		} else if (strcmp(command, "wipe_cache") == 0) {
+			*wipe_cache = 1;
+		} else if (strcmp(command, "clear_display") == 0) {
+			// Do nothing, not supported by TWRP
+		} else {
+			LOGERR("unknown command [%s]\n", command);
+		}
 	}
 	fclose(child_data);
 

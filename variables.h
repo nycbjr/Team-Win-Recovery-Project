@@ -17,15 +17,15 @@
 #ifndef _VARIABLES_HEADER_
 #define _VARIABLES_HEADER_
 
-#define TW_VERSION_STR              "2.2.2.1"
+#define TW_VERSION_STR              "2.6.3.0"
 
 #define TW_USE_COMPRESSION_VAR      "tw_use_compression"
-#define TW_IGNORE_IMAGE_SIZE        "tw_ignore_image_size"
 #define TW_FILENAME                 "tw_filename"
 #define TW_ZIP_INDEX                "tw_zip_index"
-#define TW_ZIP_QUEUE_COUNT			"tw_zip_queue_count"
+#define TW_ZIP_QUEUE_COUNT       "tw_zip_queue_count"
 
 #define MAX_BACKUP_NAME_LEN 64
+#define TW_BACKUP_TEXT              "tw_backup_text"
 #define TW_BACKUP_NAME		        "tw_backup_name"
 #define TW_BACKUP_SYSTEM_VAR        "tw_backup_system"
 #define TW_BACKUP_DATA_VAR          "tw_backup_data"
@@ -51,7 +51,9 @@
 #define TW_BACKUP_SP2_SIZE          "tw_backup_sp2_size"
 #define TW_BACKUP_SP3_SIZE          "tw_backup_sp3_size"
 #define TW_STORAGE_FREE_SIZE        "tw_storage_free_size"
+#define TW_GENERATE_MD5_TEXT        "tw_generate_md5_text"
 
+#define TW_RESTORE_TEXT             "tw_restore_text"
 #define TW_RESTORE_SYSTEM_VAR       "tw_restore_system"
 #define TW_RESTORE_DATA_VAR         "tw_restore_data"
 #define TW_RESTORE_BOOT_VAR         "tw_restore_boot"
@@ -66,6 +68,8 @@
 #define TW_RESTORE_AVG_FILE_RATE    "tw_restore_avg_file_rate"
 #define TW_RESTORE_AVG_FILE_COMP_RATE    "tw_restore_avg_file_comp_rate"
 #define TW_RESTORE_FILE_DATE        "tw_restore_file_date"
+#define TW_VERIFY_MD5_TEXT          "tw_verify_md5_text"
+#define TW_UPDATE_SYSTEM_DETAILS_TEXT "tw_update_system_details_text"
 
 #define TW_SHOW_SPAM_VAR            "tw_show_spam"
 #define TW_COLOR_THEME_VAR          "tw_color_theme"
@@ -146,6 +150,7 @@
 #define TW_CRYPTO_PASSWORD          "tw_crypto_password"
 #define TW_DATA_BLK_DEVICE          "tw_data_blk_device"  // Original block device - not decrypted
 #define TW_SDEXT_DISABLE_EXT4       "tw_sdext_disable_ext4"
+#define TW_MILITARY_TIME            "tw_military_time"
 
 // Also used:
 //   tw_boot_is_mountable
@@ -161,5 +166,19 @@
 
 // Max archive size for tar backups before we split (1.5GB)
 #define MAX_ARCHIVE_SIZE 1610612736LLU
+//#define MAX_ARCHIVE_SIZE 52428800LLU // 50MB split for testing
+
+#ifndef CUSTOM_LUN_FILE
+#define CUSTOM_LUN_FILE "/sys/devices/platform/usb_mass_storage/lun%d/file"
+#endif
+
+#ifndef TW_BRIGHTNESS_PATH
+#define TW_BRIGHTNESS_PATH /nobrightness
+#endif
+
+// For OpenRecoveryScript
+#define SCRIPT_FILE_CACHE "/cache/recovery/openrecoveryscript"
+#define SCRIPT_FILE_TMP "/tmp/openrecoveryscript"
+#define TMP_LOG_FILE "/tmp/recovery.log"
 
 #endif  // _VARIABLES_HEADER_

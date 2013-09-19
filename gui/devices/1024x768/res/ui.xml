@@ -12,9 +12,6 @@
 	<resources>
 		<resource name="font" type="font" filename="Roboto-Regular-20" />
 		<resource name="base" type="image" filename="background.jpg" />
-		<resource name="side" type="image" filename="backgroundside.jpg" />
-		<resource name="bottom" type="image" filename="backgroundbottom.jpg" />
-		<resource name="large_black" type="image" filename="large_black" />
 		<resource name="main_button" type="image" filename="button" />
 		<resource name="file_icon" type="image" filename="file" />
 		<resource name="folder_icon" type="image" filename="folder" />
@@ -61,9 +58,9 @@
 		<variable name="col3_medium_x" value="517" />
 		<variable name="col4_medium_x" value="647" />
 		<variable name="row1_medium_y" value="105" />
-		<variable name="row2_medium_y" value="175" />
+		<variable name="row2_medium_y" value="245" />
 		<variable name="row3_medium_y" value="245" />
-		<variable name="row4_medium_y" value="315" />
+		<variable name="row4_medium_y" value="450" />
 		<variable name="row5_medium_y" value="405" />
 		<variable name="row1_text_y" value="58" />
 		<variable name="row2_text_y" value="105" />
@@ -103,6 +100,7 @@
 		<variable name="text_color" value="#A0A0A0" />
 		<variable name="text_success_color" value="#33B5E5" />
 		<variable name="text_fail_color" value="#FF0101" />
+		<variable name="highlight_color" value="#90909080" />
 		<variable name="slider_x" value="307" />
 		<variable name="slider_y" value="600" />
 		<variable name="slider_text_y" value="650" />
@@ -148,7 +146,15 @@
 		<variable name="fileselector_separatorcolor" value="#505050" />
 		<variable name="fileselector_separatorheight" value="2" />
 		<variable name="fileselector_background" value="#303030" />
+		<variable name="fileselector_highlight_color" value="#505050" />
+		<variable name="fileselector_highlight_font_color" value="#33B5E5" />
 		<variable name="fileselector_spacing" value="18" />
+		<variable name="fastscroll_linecolor" value="#808080" />
+		<variable name="fastscroll_rectcolor" value="#808080" />
+		<variable name="fastscroll_w" value="32" />
+		<variable name="fastscroll_linew" value="2" />
+		<variable name="fastscroll_rectw" value="24" />
+		<variable name="fastscroll_recth" value="40" />
 		<variable name="zipstorage_text_y" value="88" />
 		<variable name="listbox_x" value="269" />
 		<variable name="listbox_y" value="90" />
@@ -170,6 +176,33 @@
 		<variable name="terminal_text_y" value="368" />
 		<variable name="terminal_button_y" value="358" />
 		<variable name="terminal_input_width" value="775" />
+		<variable name="button_fill_color" value="#303030" />
+		<variable name="button_fill_full_width" value="512" />
+		<variable name="button_fill_main_width" value="486" />
+		<variable name="button_fill_main_height" value="150" />
+		<variable name="button_fill_half_height" value="50" />
+		<variable name="button_fill_quarter_height" value="30" />
+		<variable name="button_full_center_x" value="256" />
+		<variable name="backup_list_x" value="23" />
+		<variable name="backup_list_y" value="105" />
+		<variable name="backup_list_width" value="486" />
+		<variable name="backup_list_height" value="450" />
+		<variable name="backup_storage_y" value="250" />
+		<variable name="backup_encrypt_y" value="310" />
+		<variable name="restore_list_y" value="140" />
+		<variable name="restore_list_height" value="400" />
+		<variable name="mount_list_height" value="500" />
+		<variable name="mount_storage_row" value="500" />
+		<variable name="wipe_list_height" value="400" />
+		<variable name="wipe_button_y" value="190" />
+		<variable name="slidervalue_x" value="256" />
+		<variable name="slidervalue_w" value="512" />
+		<variable name="slidervalue_line_clr" value="#FFFFFF" />
+		<variable name="slidervalue_slider_clr" value="#33B5E5" />
+		<variable name="slidervalue_lineh" value="2" />
+		<variable name="slidervalue_padding" value="0" />
+		<variable name="slidervalue_sliderw" value="10" />
+		<variable name="slidervalue_sliderh" value="50" />
 	</variables>
 
 	<templates>
@@ -177,34 +210,14 @@
 			<background color="#000000FF" />
 
 			<object type="image">
-				<image resource="side" />
-				<placement x="0" y="0" />
-			</object>
-
-			<object type="image">
-				<image resource="side" />
-				<placement x="994" y="0" />
-			</object>
-
-			<object type="image">
 				<image resource="base" />
-				<placement x="0" y="0" />
-			</object>
-
-			<object type="image">
-				<image resource="bottom" />
-				<placement x="1" y="738" />
-			</object>
-
-			<object type="image">
-				<image resource="large_black" />
 				<placement x="0" y="0" />
 			</object>
 
 			<object type="text" color="%text_color%">
 				<font resource="font" />
 				<placement x="250" y="5" />
-				<text>Team Win Recovery Project (twrp)  v%tw_version%</text>
+				<text>Team Win Recovery Project  v%tw_version%</text>
 			</object>
 
 			<object type="text" color="%text_color%">
@@ -361,6 +374,7 @@
 			<object type="keyboard">
 				<placement x="0" y="408" />
 				<layout resource1="keyboard1" resource2="keyboard2" resource3="keyboard3" resource4="keyboard4" />
+				<highlight color="%highlight_color%" />
 				<layout1>
 					<keysize height="90" width="85" />
 					<row1 key01="80:" key02="q" long02="1" key03="w" long03="2" key04="e" long04="3" key05="r" long05="4" key06="t" long06="5" key07="y" long07="6" key08="u" long08="7" key09="i" long09="8" key10="o" long10="9" key11="p" long11="0" key12="94:c:8" />
@@ -407,6 +421,7 @@
 			<object type="template" name="header" />
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Install</text>
@@ -418,6 +433,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Backup</text>
@@ -426,6 +442,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col3_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Restore</text>
@@ -434,6 +451,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col4_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Wipe</text>
@@ -442,6 +460,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Mount</text>
@@ -450,6 +469,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Settings</text>
@@ -458,6 +478,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col3_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Advanced</text>
@@ -466,6 +487,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col4_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Reboot</text>
@@ -486,76 +508,44 @@
 			</object>
 
 			<object type="button">
-				<placement x="%col2_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">internal</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">internal</action>
+				<highlight color="%highlight_color%" />
+				<fill color="%button_fill_color%" />
+				<placement x="%button_full_center_x%" y="%zipstorage_text_y%" w="%button_fill_full_width%" h="%button_fill_quarter_height%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Storage: %tw_storage_display_name% (%tw_storage_free_size% MB)</text>
+				<actions>
+					<action function="set">tw_back=install</action>
+					<action function="page">selectstorage</action>
+				</actions>
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%fileselector_folder_x%" y="%fileselector_install_y%" w="%fileselector_folder_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>Folders:</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
-				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<filter folders="1" files="0" />
 				<path name="tw_zip_location" default="/sdcard" />
 				<data name="select" />
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%fileselector_file_x%" y="%fileselector_install_y%" w="%fileselector_file_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>%tw_zip_location%</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
-				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<filter extn=".zip" folders="0" files="1" />
 				<path name="tw_zip_location" />
 				<data name="tw_filename" />
@@ -632,14 +622,6 @@
 				<image checked="checkbox_true" unchecked="checkbox_false" />
 			</object>
 
-			<object type="checkbox">
-				<placement x="%col2_x%" y="%row8_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<text>Force MD5 check on all zips?</text>
-				<data variable="tw_force_md5_check" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
 			<object type="text" color="%text_color%">
 				<font resource="font" />
 				<placement x="%center_x%" y="%row10_text_y%" placement="5" />
@@ -647,6 +629,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_zip_queue_count" op="!=" var2="10"></condition>
 				<placement x="%col2_x%" y="%row5_medium_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -656,6 +639,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col3_x%" y="%row5_medium_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Clear Queue</text>
@@ -739,6 +723,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_x%" y="%slider_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Wipe Cache/Dalvik</text>
@@ -759,19 +744,23 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_reboot_system" var2="1" />
 				<placement x="%col4_x%" y="%slider_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Reboot System</text>
 				<image resource="main_button" />
 				<actions>
-					<action function="set">tw_back=flash_done</action>
+					<action function="set">tw_back=main2</action>
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=system</action>
 					<action function="set">tw_has_action2=0</action>
 					<action function="set">tw_text1=No OS Installed! Are you</action>
 					<action function="set">tw_text2=sure you wish to reboot?</action>
+					<action function="set">tw_text3=</action>
+					<action function="set">tw_text4=</action>
 					<action function="set">tw_action_text1=Rebooting...</action>
+					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1=Rebooting...</action>
 					<action function="set">tw_slider_text=Swipe to Reboot</action>
 					<action function="page">rebootcheck</action>
@@ -779,6 +768,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%slider_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Home</text>
@@ -819,6 +809,11 @@
 				<action function="set">tw_has_action2=0</action>
 				<action function="set">tw_action2=</action>
 				<action function="set">tw_action2_param=</action>
+				<action function="set">tw_has_cancel=0</action>
+				<action function="set">tw_cancel_action=</action>
+				<action function="set">tw_cancel_param=</action>
+				<action function="set">tw_show_exclamation=0</action>
+				<action function="set">tw_show_reboot=0</action>
 				<action function="page">%tw_clear_destination%</action>
 			</object>
 		</page>
@@ -852,7 +847,7 @@
 
 			<object type="text" color="%text_color%">
 				<font resource="font" />
-				<placement x="%center_x%" y="%row8_text_y%" placement="5" />
+				<placement x="%center_x%" y="%row12_text_y%" placement="5" />
 				<text>Press back button to cancel.</text>
 			</object>
 
@@ -901,25 +896,64 @@
 
 			<object type="template" name="action_page_console" />
 
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<condition var1="tw_has_cancel" var2="1" />
+				<placement x="%col4_x%" y="%slider_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Cancel</text>
+				<image resource="main_button" />
+				<action function="%tw_cancel_action%">%tw_cancel_param%</action>
+			</object>
+
 			<object type="template" name="progress_bar" />
 
 			<object type="action">
-				<conditions>
-					<condition var1="tw_operation_state" var2="1" />
-					<condition var1="tw_operation_status" var2="0" />
-				</conditions>
+				<condition var1="tw_operation_state" var2="1" />
 				<actions>
 					<action function="page">action_complete</action>
 				</actions>
 			</object>
 
 			<object type="action">
-				<conditions>
-					<condition var1="tw_operation_state" var2="1" />
-					<condition var1="tw_operation_status" op="!=" var2="0" />
-				</conditions>
+				<condition var1="tw_has_action2" var2="0" />
 				<actions>
-					<action function="page">action_complete</action>
+					<action function="%tw_action%">%tw_action_param%</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<condition var1="tw_has_action2" var2="1" />
+				<actions>
+					<action function="%tw_action%">%tw_action_param%</action>
+					<action function="%tw_action2%">%tw_action2_param%</action>
+				</actions>
+			</object>
+		</page>
+
+		<page name="singleaction_page">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>%tw_action_text1%</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row2_text_y%" placement="5" />
+				<text>%tw_action_text2%</text>
+			</object>
+
+			<object type="template" name="action_page_console" />
+
+			<object type="template" name="progress_bar" />
+
+			<object type="action">
+				<condition var1="tw_operation_state" var2="1" />
+				<actions>
+					<action function="set">tw_page_done=1</action>
 				</actions>
 			</object>
 
@@ -965,6 +999,8 @@
 			<object type="template" name="action_page_console" />
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
+				<condition var1="tw_show_reboot" var2="0" />
 				<placement x="%col_center_x%" y="%slider_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Back</text>
@@ -972,6 +1008,30 @@
 				<actions>
 					<action function="set">tw_clear_destination=%tw_back%</action>
 					<action function="page">clear_vars</action>
+				</actions>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<condition var1="tw_show_reboot" var2="1" />
+				<placement x="%col_center_x%" y="%slider_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Reboot System</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_back=main2</action>
+					<action function="set">tw_action=reboot</action>
+					<action function="set">tw_action_param=system</action>
+					<action function="set">tw_has_action2=0</action>
+					<action function="set">tw_text1=No OS Installed! Are you</action>
+					<action function="set">tw_text2=sure you wish to reboot?</action>
+					<action function="set">tw_text3=</action>
+					<action function="set">tw_text4=</action>
+					<action function="set">tw_action_text1=Rebooting...</action>
+					<action function="set">tw_action_text2=</action>
+					<action function="set">tw_complete_text1=Rebooting...</action>
+					<action function="set">tw_slider_text=Swipe to Reboot</action>
+					<action function="page">rebootcheck</action>
 				</actions>
 			</object>
 
@@ -1042,6 +1102,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_reboot_system" var2="1" />
 				<placement x="%col1_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -1062,6 +1123,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_reboot_poweroff" var2="1" />
 				<placement x="%col2_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -1082,6 +1144,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_reboot_recovery" var2="1" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -1102,6 +1165,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_reboot_bootloader" var2="1" />
 				<placement x="%col2_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -1122,6 +1186,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_download_mode" var2="1" />
 				<placement x="%col3_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -1154,6 +1219,50 @@
 			<object type="template" name="footer" />
 		</page>
 
+		<page name="selectstorage">
+			<object type="template" name="header" />
+
+			<object type="partitionlist">
+				<highlight color="%fileselector_highlight_color%" />
+				<placement x="%col2_x%" y="%fileselector_install_y%" w="%fileselector_folderonly_width%" h="%fileselector_install_height%" />
+				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
+				<text>Select Storage:</text>
+				<icon selected="radio_true" unselected="radio_false" />
+				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
+				<background color="%listbox_background%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
+				<data name="tw_storage_path" />
+				<listtype name="storage" />
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%filemanager_select_x%" y="%row2_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>OK</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_clear_destination=%tw_back%</action>
+					<action function="page">clear_vars</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<actions>
+					<action function="page">%tw_back%</action>
+				</actions>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
 		<page name="mount">
 			<object type="template" name="header" />
 
@@ -1163,9 +1272,35 @@
 				<text>Mount Menu</text>
 			</object>
 
+			<object type="partitionlist">
+				<highlight color="%fileselector_highlight_color%" />
+				<placement x="%backup_list_x%" y="%backup_list_y%" w="%backup_list_width%" h="%mount_list_height%" />
+				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
+				<text>Select Partitions to Mount:</text>
+				<icon selected="checkbox_true" unselected="checkbox_false" />
+				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
+				<background color="%listbox_background%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
+				<listtype name="mount" />
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<conditions>
+					<condition var1="tw_is_encrypted" var2="1" />
+					<condition var1="tw_is_decrypted" var2="0" />
+				</conditions>
+				<placement x="%col3_x%" y="row1_y" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Decrypt Data</text>
+				<image resource="main_button" />
+				<action function="page">decrypt</action>
+			</object>
+
 			<object type="button">
 				<condition var1="tw_has_usb_storage" var2="1" />
-				<placement x="%col1_x%" y="%row1_y%" />
+				<placement x="%col4_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Mount USB Storage</text>
 				<image resource="main_button" />
@@ -1173,200 +1308,15 @@
 			</object>
 
 			<object type="button">
-				<placement x="%col1_x%" y="%row7_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="!=" var2="/system" />
-				<text>Mount System</text>
-				<image resource="checkbox_false" />
-				<action function="mount">/system</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row7_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="=" var2="/system" />
-				<text>Unmount System</text>
-				<image resource="checkbox_true" />
-				<action function="umount">/system</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row8_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="!=" var2="/data" />
-				<text>Mount Data</text>
-				<image resource="checkbox_false" />
-				<action function="mount">/data</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row8_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="=" var2="/data" />
-				<text>Unmount Data</text>
-				<image resource="checkbox_true" />
-				<action function="umount">/data</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row9_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="!=" var2="/cache" />
-				<text>Mount Cache</text>
-				<image resource="checkbox_false" />
-				<action function="mount">/cache</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row9_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="=" var2="/cache" />
-				<text>Unmount Cache</text>
-				<image resource="checkbox_true" />
-				<action function="umount">/cache</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row10_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_external" var2="1" />
-					<condition var1="mounted" op="!=" var2="EXTERNAL" />
-				</conditions>
-				<text>Mount SDCard</text>
-				<image resource="checkbox_false" />
-				<action function="mount">EXTERNAL</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row10_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_external" var2="1" />
-					<condition var1="mounted" op="=" var2="EXTERNAL" />
-				</conditions>
-				<text>Unmount SDCard</text>
-				<image resource="checkbox_true" />
-				<action function="umount">EXTERNAL</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%row10_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_internal" var2="1" />
-					<condition var1="tw_has_data_media" var2="0" />
-					<condition var1="mounted" op="!=" var2="INTERNAL" />
-				</conditions>
-				<text>Mount Internal Storage</text>
-				<image resource="checkbox_false" />
-				<action function="mount">INTERNAL</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%row10_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_internal" var2="1" />
-					<condition var1="tw_has_data_media" var2="0" />
-					<condition var1="mounted" op="=" var2="INTERNAL" />
-				</conditions>
-				<text>Unmount Internal Storage</text>
-				<image resource="checkbox_true" />
-				<action function="umount">INTERNAL</action>
-			</object>
-
-			<object type="button">
-				<conditions>
-					<condition var1="tw_has_sdext_partition" var2="1" />
-					<condition var1="mounted" op="!=" var2="/sd-ext" />
-				</conditions>
-				<placement x="%col1_x%" y="%row11_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<text>Mount SD-Ext</text>
-				<image resource="checkbox_false" />
-				<action function="mount">/sd-ext</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row11_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<condition var1="mounted" op="=" var2="/sd-ext" />
-				<text>Unmount SD-Ext</text>
-				<image resource="checkbox_true" />
-				<action function="umount">/sd-ext</action>
-			</object>
-
-			<object type="button">
-				<conditions>
-					<condition var1="tw_boot_is_mountable" var2="1" />
-					<condition var1="mounted" op="!=" var2="/boot" />
-				</conditions>
-				<placement x="%col1_x%" y="%row12_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<text>Mount Boot</text>
-				<image resource="checkbox_false" />
-				<action function="mount">/boot</action>
-			</object>
-
-			<object type="button">
-				<conditions>
-					<condition var1="tw_boot_is_mountable" var2="1" />
-					<condition var1="mounted" op="=" var2="/boot" />
-				</conditions>
-				<placement x="%col1_x%" y="%row12_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<text>Unmount Boot</text>
-				<image resource="checkbox_true" />
-				<action function="umount">/boot</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row13_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col1_x%" y="%row13_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%row13_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">internal</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%row13_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">internal</action>
+				<highlight color="%highlight_color%" />
+				<fill color="%button_fill_color%" />
+				<placement x="%col3_x%" y="%backup_storage_y%" w="%button_fill_main_width%" h="%button_fill_half_height%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Storage: %tw_storage_display_name% (%tw_storage_free_size% MB)</text>
+				<actions>
+					<action function="set">tw_back=mount</action>
+					<action function="page">selectstorage</action>
+				</actions>
 			</object>
 
 			<object type="action">
@@ -1398,6 +1348,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Unmount</text>
@@ -1430,119 +1381,43 @@
 			<object type="text" color="%text_color%">
 				<font resource="font" />
 				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
-				<text>Wipe Menu</text>
+				<text>Factory Reset: Wipes Data, Cache, and Dalvik</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<condition var1="tw_has_data_media" var2="0" />
+				<font resource="font" />
+				<placement x="%center_x%" y="%row2_text_y%" placement="5" />
+				<text>.android_secure</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<condition var1="tw_has_data_media" var2="1" />
+				<font resource="font" />
+				<placement x="%center_x%" y="%row2_text_y%" placement="5" />
+				<text>(not including internal storage)</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<condition var1="tw_has_sdext_partition" var2="1" />
+				<font resource="font" />
+				<placement x="%center_x%" y="%row3_text_y%" placement="5" />
+				<text>SD-EXT</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row4_text_y%" placement="5" />
+				<text>Most of the time this is the only wipe that you need.</text>
 			</object>
 
 			<object type="button">
-				<placement x="%col1_x%" y="%row1_y%" />
+				<highlight color="%highlight_color%" />
+				<placement x="%col2_x%" y="%wipe_button_y%" />
 				<font resource="font" color="%button_text_color%" />
-				<text>Cache</text>
+				<text>Advanced Wipe</text>
 				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=/cache</action>
-					<action function="set">tw_text1=Wipe Cache?</action>
-					<action function="set">tw_action_text1=Wiping Cache...</action>
-					<action function="set">tw_complete_text1=Cache Wipe Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
-				</actions>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%row1_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>Dalvik Cache</text>
-				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=dalvik</action>
-					<action function="set">tw_text1=Wipe Dalvik-Cache?</action>
-					<action function="set">tw_action_text1=Wiping Dalvik-Cache...</action>
-					<action function="set">tw_complete_text1=Dalvik-Cache Wipe Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
-				</actions>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%row1_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>Factory Reset</text>
-				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=data</action>
-					<action function="set">tw_text1=Factory Reset?</action>
-					<action function="set">tw_text2=(Wipes Data and Cache)</action>
-					<action function="set">tw_action_text1=Factory Reset...</action>
-					<action function="set">tw_complete_text1=Factory Reset Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
-				</actions>
-			</object>
-
-			<object type="button">
-				<placement x="%col4_x%" y="%row1_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>System</text>
-				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=/system</action>
-					<action function="set">tw_text1=Wipe System?</action>
-					<action function="set">tw_text2=This will wipe your ROM</action>
-					<action function="set">tw_action_text1=Wiping System...</action>
-					<action function="set">tw_complete_text1=System Wipe Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
-				</actions>
-			</object>
-
-			<object type="button">
-				<condition var1="tw_has_external" var2="1" />
-				<placement x="%col1_x%" y="%row2_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>External Storage</text>
-				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=EXTERNAL</action>
-					<action function="set">tw_has_action2=1</action>
-					<action function="set">tw_action2=set</action>
-					<action function="set">tw_action2_param=tw_zip_location=/sdcard</action>
-					<action function="set">tw_text1=Wipe External Storage (SD card)?</action>
-					<action function="set">tw_action_text1=Wiping External Storage...</action>
-					<action function="set">tw_complete_text1=External Storage Wipe Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
-				</actions>
-			</object>
-
-			<object type="button">
-				<condition var1="tw_has_internal" var2="1" />
-				<placement x="%col2_x%" y="%row2_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>Internal Storage</text>
-				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=INTERNAL</action>
-					<action function="set">tw_has_action2=1</action>
-					<action function="set">tw_action2=set</action>
-					<action function="set">tw_action2_param=tw_zip_location=/sdcard</action>
-					<action function="set">tw_text1=Wipe Internal Storage?</action>
-					<action function="set">tw_action_text1=Wiping Internal Storage...</action>
-					<action function="set">tw_complete_text1=Internal Storage Wipe Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
-				</actions>
+				<action function="page">advancedwipe</action>
 			</object>
 
 			<object type="button">
@@ -1550,42 +1425,39 @@
 					<condition var1="tw_has_internal" var2="1" />
 					<condition var1="tw_has_data_media" var2="1" />
 				</conditions>
-				<placement x="%col3_x%" y="%row2_y%" />
+				<highlight color="%highlight_color%" />
+				<placement x="%col3_x%" y="%wipe_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Format Data</text>
 				<image resource="main_button" />
 				<actions>
-					<action function="set">tw_back=wipe</action>
-					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=DATAMEDIA</action>
-					<action function="set">tw_has_action2=1</action>
-					<action function="set">tw_action2=set</action>
-					<action function="set">tw_action2_param=tw_zip_location=/sdcard</action>
-					<action function="set">tw_text1=Format Data? (This wipes all media</action>
-					<action function="set">tw_text2=including backups & removes encryption)</action>
-					<action function="set">tw_action_text1=Formatting Data...</action>
-					<action function="set">tw_complete_text1=Data Format Complete</action>
-					<action function="set">tw_slider_text=Swipe to Format</action>
-					<action function="page">confirm_action</action>
+					<action function="page">formatdata</action>
 				</actions>
 			</object>
 
-			<object type="button">
-				<condition var1="tw_has_sdext_partition" var2="1" />
-				<placement x="%col4_x%" y="%row2_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>SD Ext</text>
-				<image resource="main_button" />
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row12_text_y%" placement="5" />
+				<text>Press back button to cancel.</text>
+			</object>
+
+			<object type="slider">
+				<placement x="%slider_x%" y="%slider_y%" />
+				<resource base="slider" used="slider-used" touch="slider-touch" />
 				<actions>
 					<action function="set">tw_back=wipe</action>
 					<action function="set">tw_action=wipe</action>
-					<action function="set">tw_action_param=/sd-ext</action>
-					<action function="set">tw_text1=Wipe SD-Ext?</action>
-					<action function="set">tw_action_text1=Wiping SD-Ext...</action>
-					<action function="set">tw_complete_text1=SD-Ext Wipe Complete</action>
-					<action function="set">tw_slider_text=Swipe to Wipe</action>
-					<action function="page">confirm_action</action>
+					<action function="set">tw_action_param=data</action>
+					<action function="set">tw_action_text1=Factory Reset...</action>
+					<action function="set">tw_complete_text1=Factory Reset Complete</action>
+					<action function="page">action_page</action>
 				</actions>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%slider_text_y%" placement="4" />
+				<text>Swipe to Factory Reset</text>
 			</object>
 
 			<object type="action">
@@ -1601,6 +1473,128 @@
 			<object type="template" name="footer" />
 		</page>
 
+		<page name="advancedwipe">
+			<object type="template" name="header" />
+
+			<object type="partitionlist">
+				<highlight color="%fileselector_highlight_color%" />
+				<placement x="%listbox_x%" y="%row2_text_y%" w="%listbox_width%" h="%wipe_list_height%" />
+				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
+				<text>Select Partitions to Wipe:</text>
+				<icon selected="checkbox_true" unselected="checkbox_false" />
+				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
+				<background color="%listbox_background%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
+				<data name="tw_wipe_list" />
+				<listtype name="wipe" />
+			</object>
+
+			<object type="slider">
+				<placement x="%slider_x%" y="%slider_y%" />
+				<resource base="slider" used="slider-used" touch="slider-touch" />
+				<actions>
+					<action function="set">tw_back=advancedwipe</action>
+					<action function="set">tw_action=wipe</action>
+					<action function="set">tw_action_param=LIST</action>
+					<action function="set">tw_text1=Wipe Selected Partition(s)?</action>
+					<action function="set">tw_action_text1=Wiping Partition(s)...</action>
+					<action function="set">tw_complete_text1=Wipe Complete</action>
+					<action function="page">action_page</action>
+				</actions>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%slider_text_y%" placement="4" />
+				<text>Swipe to Wipe</text>
+			</object>
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">wipe</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
+		<page name="formatdata">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>Format Data will wipe all of your apps, backups, pictures,</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row2_text_y%" placement="5" />
+				<text>videos, media, and removes encryption on internal storage.</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row3_text_y%" placement="5" />
+				<text>This cannot be undone. Press back to cancel.</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row4_text_y%" placement="5" />
+				<text>Type yes to continue.</text>
+			</object>
+
+			<object type="input">
+				<placement x="%input_x%" y="%row6_text_y%" w="%input_width%" h="%input_height%" placement="0" />
+				<background color="%input_background_color%" />
+				<cursor color="%input_cursor_color%" hasfocus="1" width="%input_cursor_width%" />
+				<font resource="font" color="%text_color%" />
+				<text>%tw_confirm_formatdata%</text>
+				<data name="tw_confirm_formatdata" />
+				<restrict minlen="3" maxlen="3" allow="yes" />
+				<action function="page">formatdata_confirm</action>
+			</object>
+
+			<object type="template" name="keyboardtemplate" />
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">wipe</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
+		<page name="formatdata_confirm">
+			<object type="action">
+				<condition var1="tw_confirm_formatdata" op="=" var2="yes" />
+				<actions>
+					<action function="set">tw_back=formatdata</action>
+					<action function="set">tw_action=wipe</action>
+					<action function="set">tw_action_param=DATAMEDIA</action>
+					<action function="set">tw_action_text1=Formatting Data...</action>
+					<action function="set">tw_complete_text1=Data Format Complete</action>
+					<action function="page">action_page</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<condition var1="tw_confirm_formatdata" op="!=" var2="yes" />
+				<action function="page">formatdata</function>
+			</object>
+		</page>
+
 		<page name="backup">
 			<object type="template" name="header" />
 
@@ -1610,10 +1604,18 @@
 				<text>Back Up Device</text>
 			</object>
 
-			<object type="text" color="%text_color%">
-				<font resource="font" />
-				<placement x="%col1_x%" y="%row2_text_y%" placement="0" />
-				<text>Free Space: %tw_storage_free_size% MB</text>
+			<object type="partitionlist">
+				<highlight color="%fileselector_highlight_color%" />
+				<placement x="%backup_list_x%" y="%backup_list_y%" w="%backup_list_width%" h="%backup_list_height%" />
+				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
+				<text>Select Partitions to Back Up:</text>
+				<icon selected="checkbox_true" unselected="checkbox_false" />
+				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
+				<background color="%listbox_background%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
+				<data name="tw_backup_list" />
+				<listtype name="backup" />
 			</object>
 
 			<object type="text" color="%text_color%">
@@ -1622,95 +1624,71 @@
 				<text>Backup Name: %tw_backup_name%</text>
 			</object>
 
-			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row1%" />
-				<font resource="font" color="%text_color%" />
-				<text>System (%tw_backup_system_size% MB)</text>
-				<data variable="tw_backup_system" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col3_x%" y="%row1_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Refresh Sizes</text>
+				<image resource="main_button" />
+				<action function="refreshsizes"></action>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col4_x%" y="%row1_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Set Backup Name</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_fileexists=0</action>
+					<action function="page">backupname1</action>
+				</actions>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<fill color="%button_fill_color%" />
+				<placement x="%col3_x%" y="%backup_storage_y%" w="%button_fill_main_width%" h="%button_fill_half_height%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Storage: %tw_storage_display_name% (%tw_storage_free_size% MB)</text>
+				<actions>
+					<action function="set">tw_back=backup</action>
+					<action function="page">selectstorage</action>
+				</actions>
+			</object>
+
+			<object type="button">
+				<conditions>
+					<condition var1="tw_include_encrypted_backup" var2="1" />
+					<condition var1="tw_encrypt_backup" var2="0" />
+				</conditions>
+				<highlight color="%highlight_color%" />
+				<fill color="%button_fill_color%" />
+				<placement x="%col3_x%" y="%backup_encrypt_y%" w="%button_fill_main_width%" h="%button_fill_half_height%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>No Encryption</text>
+				<actions>
+					<action function="page">backupencryption</action>
+				</actions>
+			</object>
+
+			<object type="button">
+				<conditions>
+					<condition var1="tw_include_encrypted_backup" var2="1" />
+					<condition var1="tw_encrypt_backup" var2="1" />
+				</conditions>
+				<highlight color="%highlight_color%" />
+				<fill color="%button_fill_color%" />
+				<placement x="%col3_x%" y="%backup_encrypt_y%" w="%button_fill_main_width%" h="%button_fill_half_height%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Using Encryption</text>
+				<actions>
+					<action function="page">backupencryption</action>
+				</actions>
 			</object>
 
 			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row2%" />
-				<font resource="font" color="%text_color%" />
-				<text>Data (%tw_backup_data_size% MB)</text>
-				<data variable="tw_backup_data" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_has_boot_partition" var2="1" />
-				<placement x="%nandcheck_col1%" y="%nandcheck_row3%" />
-				<font resource="font" color="%text_color%" />
-				<text>Boot (%tw_backup_boot_size% MB)</text>
-				<data variable="tw_backup_boot" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_has_recovery_partition" var2="1" />
-				<placement x="%nandcheck_col1%" y="%nandcheck_row4%" />
-				<font resource="font" color="%text_color%" />
-				<text>Recovery (%tw_backup_recovery_size% MB)</text>
-				<data variable="tw_backup_recovery" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row5%" />
-				<font resource="font" color="%text_color%" />
-				<text>Cache (%tw_backup_cache_size% MB)</text>
-				<data variable="tw_backup_cache" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_has_android_secure" var2="1" />
-				<placement x="%nandcheck_col2%" y="%nandcheck_row1%" />
-				<font resource="font" color="%text_color%" />
-				<text>.android_secure (%tw_backup_andsec_size% MB)</text>
-				<data variable="tw_backup_andsec" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_has_sdext_partition" var2="1" />
-				<placement x="%nandcheck_col2%" y="%nandcheck_row2%" />
-				<font resource="font" color="%text_color%" />
-				<text>sd-ext (%tw_backup_sdext_size% MB)</text>
-				<data variable="tw_backup_sdext" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_sp1_name" op=">" var2="" />
-				<placement x="%nandcheck_col2%" y="%nandcheck_row3%" />
-				<font resource="font" color="%text_color%" />
-				<text>%tw_sp1_name% (%tw_backup_sp1_size% MB)</text>
-				<data variable="tw_backup_sp1" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_sp2_name" op=">" var2="" />
-				<placement x="%nandcheck_col2%" y="%nandcheck_row4%" />
-				<font resource="font" color="%text_color%" />
-				<text>%tw_sp2_name% (%tw_backup_sp2_size% MB)</text>
-				<data variable="tw_backup_sp2" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<condition var1="tw_sp3_name" op=">" var2="" />
-				<placement x="%nandcheck_col2%" y="%nandcheck_row5%" />
-				<font resource="font" color="%text_color%" />
-				<text>%tw_sp3_name% (%tw_backup_sp3_size% MB)</text>
-				<data variable="tw_backup_sp3" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%col1_x%" y="%nandcheck_row6%" />
+				<placement x="%col3_x%" y="%nandcheck_row6%" />
 				<font resource="font" color="%text_color%" />
 				<text>Enable Compression (Requires more time)</text>
 				<data variable="tw_use_compression" />
@@ -1718,59 +1696,11 @@
 			</object>
 
 			<object type="checkbox">
-				<placement x="%col3_x%" y="%nandcheck_row6%" />
+				<placement x="%col3_x%" y="%nandcheck_row7%" />
 				<font resource="font" color="%text_color%" />
 				<text>Skip MD5 generation on backups</text>
 				<data variable="tw_skip_md5_generate" />
 				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%nandcheck_row7%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%nandcheck_row7%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%nandcheck_row7%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">internal</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%nandcheck_row7%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">internal</action>
 			</object>
 
 			<object type="slider">
@@ -1788,25 +1718,6 @@
 				<text>Swipe to Back Up</text>
 			</object>
 
-			<object type="button">
-				<placement x="%col4_x%" y="%row1_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>Refresh Sizes</text>
-				<image resource="main_button" />
-				<action function="refreshsizes"></action>
-			</object>
-
-			<object type="button">
-				<placement x="%col4_x%" y="%backup_name_button_y%" />
-				<font resource="font" color="%button_text_color%" />
-				<text>Set Backup Name</text>
-				<image resource="main_button" />
-				<actions>
-					<action function="set">tw_fileexists=0</action>
-					<action function="page">backupname1</action>
-				</actions>
-			</object>
-
 			<object type="action">
 				<touch key="home" />
 				<action function="page">main</action>
@@ -1822,8 +1733,8 @@
 
 		<page name="backupname1">
 			<object type="action">
-				<condition var1="tw_backup_name" op="=" var2="(Current Date)" />
-				<action function="set">tw_backup_name=</function>
+				<condition var1="tw_backup_name" op="=" var2="(Auto Generate)" />
+				<action function="generatebackupname"></function>
 			</object>
 
 			<object type="action">
@@ -1847,7 +1758,7 @@
 				<font resource="font" color="%text_color%" />
 				<text>%tw_backup_name%</text>
 				<data name="tw_backup_name" />
-				<restrict minlen="1" maxlen="64" allow="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_.{}[]" />
+				<restrict minlen="1" maxlen="64" allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_.{}[]" />
 				<actions>
 					<action function="set">tw_filecheck=%tw_backups_folder%/%tw_backup_name%</action>
 					<action function="set">tw_existpage=backupname2</action>
@@ -1864,12 +1775,22 @@
 			</object>
 
 			<object type="button">
-				<placement x="%col_center_x%" y="%cancel_button_y%" />
+				<highlight color="%highlight_color%" />
+				<placement x="%col2_x%" y="%cancel_button_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Append Date</text>
+				<image resource="main_button" />
+				<action function="appenddatetobackupname"></action>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col3_x%" y="%cancel_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Cancel / Clear</text>
 				<image resource="main_button" />
 				<actions>
-					<action function="set">tw_backup_name=(Current Date)</action>
+					<action function="set">tw_backup_name=(Auto Generate)</action>
 					<action function="page">backup</action>
 				</actions>
 			</object>
@@ -1879,7 +1800,7 @@
 			<object type="action">
 				<touch key="home" />
 				<actions>
-					<action function="set">tw_backup_name=(Current Date)</action>
+					<action function="set">tw_backup_name=(Auto Generate)</action>
 					<action function="page">main</action>
 				</actions>
 			</object>
@@ -1887,12 +1808,146 @@
 			<object type="action">
 				<touch key="back" />
 				<actions>
-					<action function="set">tw_backup_name=(Current Date)</action>
+					<action function="set">tw_backup_name=(Auto Generate)</action>
 					<action function="page">backup</action>
 				</actions>
 			</object>
 
 			<object type="template" name="footer" />
+		</page>
+
+		<page name="backupencryption">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>Encrypt your backup? Please enter a password:</text>
+			</object>
+
+			<object type="input">
+				<placement x="%input_x%" y="%row3_text_y%" w="%input_width%" h="%input_height%" placement="0" />
+				<background color="%input_background_color%" />
+				<cursor color="%input_cursor_color%" hasfocus="1" width="%input_cursor_width%" />
+				<font resource="font" color="%text_color%" />
+				<text>%tw_backup_encrypt_display%</text>
+				<data name="tw_backup_password" mask="*" maskvariable="tw_backup_encrypt_display" />
+				<restrict minlen="1" maxlen="32" allow="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_" />
+				<action function="page">backupencryption2</action>
+			</object>
+
+			<object type="text" color="%text_fail_color%">
+				<condition var1="tw_password_not_match" var2="1" />
+				<font resource="font" />
+				<placement x="%center_x%" y="%row4_text_y%" placement="5" />
+				<text>Passwords Do Not Match</text>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col_center_x%" y="%cancel_button_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Cancel</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_encrypt_backup=0</action>
+					<action function="set">tw_backup_password=</action>
+					<action function="set">tw_backup_password2=</action>
+					<action function="set">tw_backup_encrypt_display=</action>
+					<action function="set">tw_backup_encrypt_display2=</action>
+					<action function="page">backup</action>
+				</actions>
+			</object>
+
+			<object type="template" name="keyboardtemplate" />
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">backup</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
+		<page name="backupencryption2">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>Encrypt your backup? Please Enter Password Again:</text>
+			</object>
+
+			<object type="input">
+				<placement x="%input_x%" y="%row3_text_y%" w="%input_width%" h="%input_height%" placement="0" />
+				<background color="%input_background_color%" />
+				<cursor color="%input_cursor_color%" hasfocus="1" width="%input_cursor_width%" />
+				<font resource="font" color="%text_color%" />
+				<text>%tw_backup_encrypt_display2%</text>
+				<data name="tw_backup_password2" mask="*" maskvariable="tw_backup_encrypt_display2" />
+				<restrict minlen="1" maxlen="32" allow="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_" />
+				<actions>
+					<action function="page">checkbackuppassword</action>
+				</actions>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col_center_x%" y="%cancel_button_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Cancel</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_encrypt_backup=0</action>
+					<action function="set">tw_backup_password=</action>
+					<action function="set">tw_backup_password2=</action>
+					<action function="set">tw_backup_encrypt_display=</action>
+					<action function="set">tw_backup_encrypt_display2=</action>
+					<action function="page">backup</action>
+				</actions>
+			</object>
+
+			<object type="template" name="keyboardtemplate" />
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">backup</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
+		<page name="checkbackuppassword">
+			<object type="action">
+				<condition var1="tw_backup_password2" var2="tw_backup_password" />
+				<actions>
+					<action function="set">tw_encrypt_backup=1</action>
+					<action function="page">backup</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<condition var1="tw_backup_password2" op="!=" var2="tw_backup_password" />
+				<actions>
+					<action function="set">tw_encrypt_backup=0</action>
+					<action function="set">tw_password_not_match=1</action>
+					<action function="set">tw_backup_password=</action>
+					<action function="set">tw_backup_password2=</action>
+					<action function="set">tw_backup_encrypt_display=</action>
+					<action function="set">tw_backup_encrypt_display2=</action>
+					<action function="page">backupencryption</action>
+				</actions>
+			</object>
 		</page>
 
 		<page name="backup_run">
@@ -1917,6 +1972,7 @@
 				<actions>
 					<action function="set">tw_back=backup</action>
 					<action function="set">tw_complete_text1=Backup Complete</action>
+					<action function="set">tw_show_reboot=1</action>
 					<action function="page">action_complete</action>
 				</actions>
 			</object>
@@ -1928,60 +1984,26 @@
 			<object type="template" name="header" />
 
 			<object type="button">
-				<placement x="%col2_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col2_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using external SD</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">external</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="1" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_false" />
-				<action function="togglestorage">internal</action>
-			</object>
-
-			<object type="button">
-				<placement x="%col3_x%" y="%zipstorage_text_y%" />
-				<font resource="font" color="%text_color%" />
-				<conditions>
-					<condition var1="tw_has_dual_storage" var2="1" />
-					<condition var1="tw_use_external_storage" var2="0" />
-				</conditions>
-				<text>Using internal storage</text>
-				<image resource="radio_true" />
-				<action function="togglestorage">internal</action>
+				<highlight color="%highlight_color%" />
+				<fill color="%button_fill_color%" />
+				<placement x="%col2_x%" y="%zipstorage_text_y%" w="%fileselector_folderonly_width%" h="%button_fill_quarter_height%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Storage: %tw_storage_display_name% (%tw_storage_free_size% MB)</text>
+				<actions>
+					<action function="set">tw_back=restore</action>
+					<action function="page">selectstorage</action>
+				</actions>
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%col2_x%" y="%fileselector_install_y%" w="%fileselector_folderonly_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>Select Package to Restore:</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
-				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
 				<filter folders="1" files="0" nav="0" />
@@ -1996,7 +2018,7 @@
 				<condition var1="tw_restore" op="modified" />
 				<actions>
 					<action function="readBackup"></action>
-					<action function="page">restore_select</action>
+					<action function="page">restore_read</action>
 				</actions>
 			</object>
 
@@ -2011,6 +2033,138 @@
 			</object>
 
 			<object type="template" name="footer" />
+		</page>
+
+		<page name="restore_read">
+			<object type="action">
+				<condition var1="tw_restore_encrypted" var2="1" />
+				<actions>
+					<action function="set">tw_password_fail=0</action>
+					<action function="page">restore_decrypt</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<condition var1="tw_restore_encrypted" var2="0" />
+				<actions>
+					<action function="page">restore_select</action>
+				</actions>
+			</object>
+		</page>
+
+		<page name="restore_decrypt">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>Backup encrypted. Please enter your password:</text>
+			</object>
+
+			<object type="input">
+				<placement x="%input_x%" y="%row3_text_y%" w="%input_width%" h="%input_height%" placement="0" />
+				<background color="%input_background_color%" />
+				<cursor color="%input_cursor_color%" hasfocus="1" width="%input_cursor_width%" />
+				<font resource="font" color="%text_color%" />
+				<text>%tw_restore_display%</text>
+				<data name="tw_restore_password" mask="*" maskvariable="tw_restore_display" />
+				<restrict minlen="1" maxlen="32" allow="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_" />
+				<actions>
+					<action function="page">try_restore_decrypt</action>
+				</actions>
+			</object>
+
+			<object type="text" color="%text_fail_color%">
+				<condition var1="tw_password_fail" var2="1" />
+				<font resource="font" />
+				<placement x="%center_x%" y="%row4_text_y%" placement="5" />
+				<text>Password Failed, Please Try Again</text>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col2_x%" y="%cancel_button_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Cancel</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_page_done=1</action>
+					<action function="page">restore</action>
+				</actions>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col3_x%" y="%cancel_button_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Delete</text>
+				<image resource="main_button" />
+				<actions>
+					<action function="set">tw_back=restore</action>
+					<action function="set">tw_action=cmd</action>
+					<action function="set">tw_action_param=cd %tw_backups_folder% && rm -rf &quot;%tw_restore_name%&quot;</action>
+					<action function="set">tw_text1=Delete Backup? %tw_restore_name%</action>
+					<action function="set">tw_text2=This cannot be undone!</action>
+					<action function="set">tw_action_text1=Deleting Backup...</action>
+					<action function="set">tw_complete_text1=Backup Delete Complete</action>
+					<action function="set">tw_slider_text=Swipe to Delete</action>
+					<action function="page">confirm_action</action>
+				</actions>
+			</object>
+
+			<object type="template" name="keyboardtemplate" />
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">restore</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
+		<page name="try_restore_decrypt">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>Trying Decryption with Your Password</text>
+			</object>
+
+			<object type="template" name="action_page_console" />
+
+			<object type="template" name="progress_bar" />
+
+			<object type="action">
+				<action function="decrypt_backup"></action>
+			</object>
+
+			<object type="action">
+				<conditions>
+					<condition var1="tw_operation_state" var2="1" />
+					<condition var1="tw_operation_status" op="!=" var2="0" />
+				</conditions>
+				<actions>
+					<action function="set">tw_password_fail=1</action>
+					<action function="page">restore_decrypt</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<conditions>
+					<condition var1="tw_operation_state" var2="1" />
+					<condition var1="tw_operation_status" op="=" var2="0" />
+				</conditions>
+				<actions>
+					<action function="set">tw_page_done=1</action>
+					<action function="page">restore_select</action>
+				</actions>
+			</object>
 		</page>
 
 		<page name="restore_select">
@@ -2028,89 +2182,22 @@
 				<text>Package Date: %tw_restore_file_date%</text>
 			</object>
 
-			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row1%" />
-				<font resource="font" color="%text_color%" />
-				<text>System</text>
-				<condition var1="tw_restore_system" op=">=" var2="0" />
-				<data variable="tw_restore_system" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
+			<object type="partitionlist">
+				<highlight color="%fileselector_highlight_color%" />
+				<placement x="%backup_list_x%" y="%restore_list_y%" w="%backup_list_width%" h="%restore_list_height%" />
+				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
+				<text>Select Partitions to Restore:</text>
+				<icon selected="checkbox_true" unselected="checkbox_false" />
+				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
+				<background color="%listbox_background%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
+				<data name="tw_restore_list" selectedlist="tw_restore_selected" />
+				<listtype name="restore" />
 			</object>
 
 			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row2%" />
-				<font resource="font" color="%text_color%" />
-				<text>Data</text>
-				<condition var1="tw_restore_data" op=">=" var2="0" />
-				<data variable="tw_restore_data" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row3%" />
-				<font resource="font" color="%text_color%" />
-				<text>Boot</text>
-				<condition var1="tw_restore_boot" op=">=" var2="0" />
-				<data variable="tw_restore_boot" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%nandcheck_col1%" y="%nandcheck_row5%" />
-				<font resource="font" color="%text_color%" />
-				<text>Cache</text>
-				<condition var1="tw_restore_cache" op=">=" var2="0" />
-				<data variable="tw_restore_cache" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%nandcheck_col2%" y="%nandcheck_row1%" />
-				<font resource="font" color="%text_color%" />
-				<text>.android_secure</text>
-				<condition var1="tw_restore_andsec" op=">=" var2="0" />
-				<data variable="tw_restore_andsec" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%nandcheck_col2%" y="%nandcheck_row2%" />
-				<font resource="font" color="%text_color%" />
-				<text>sd-ext</text>
-				<condition var1="tw_restore_sdext" op=">=" var2="0" />
-				<data variable="tw_restore_sdext" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-			
-			<object type="checkbox">
-				<placement x="%nandcheck_col2%" y="%nandcheck_row3%" />
-				<font resource="font" color="%text_color%" />
-				<text>%tw_sp1_name%</text>
-				<condition var1="tw_restore_sp1" op=">=" var2="0" />
-				<data variable="tw_restore_sp1" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-			
-			<object type="checkbox">
-				<placement x="%nandcheck_col2%" y="%nandcheck_row4%" />
-				<font resource="font" color="%text_color%" />
-				<text>%tw_sp2_name%</text>
-				<condition var1="tw_restore_sp2" op=">=" var2="0" />
-				<data variable="tw_restore_sp2" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-			
-			<object type="checkbox">
-				<placement x="%nandcheck_col2%" y="%nandcheck_row5%" />
-				<font resource="font" color="%text_color%" />
-				<text>%tw_sp3_name%</text>
-				<condition var1="tw_restore_sp3" op=">=" var2="0" />
-				<data variable="tw_restore_sp3" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%col1_x%" y="%nandcheck_row6%" />
+				<placement x="%col3_x%" y="%nandcheck_row6%" />
 				<font resource="font" color="%text_color%" />
 				<text>Enable MD5 checking of backup files</text>
 				<data variable="tw_skip_md5_check" />
@@ -2118,6 +2205,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col4_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Rename Backup</text>
@@ -2130,14 +2218,15 @@
 			</object>
 
 			<object type="button">
-				<placement x="%col4_x%" y="%backup_name_button_y%" />
+				<highlight color="%highlight_color%" />
+				<placement x="%col3_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Delete Backup</text>
 				<image resource="main_button" />
 				<actions>
 					<action function="set">tw_back=restore</action>
 					<action function="set">tw_action=cmd</action>
-					<action function="set">tw_action_param=cd %tw_backups_folder% && rm -rf %tw_restore_name%</action>
+					<action function="set">tw_action_param=cd %tw_backups_folder% && rm -rf &quot;%tw_restore_name%&quot;</action>
 					<action function="set">tw_text1=Delete Backup? %tw_restore_name%</action>
 					<action function="set">tw_text2=This cannot be undone!</action>
 					<action function="set">tw_action_text1=Deleting Backup...</action>
@@ -2188,11 +2277,11 @@
 				<font resource="font" color="%text_color%" />
 				<text>%tw_backup_rename%</text>
 				<data name="tw_backup_rename" />
-				<restrict minlen="1" maxlen="64" allow="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_.{}[]" />
+				<restrict minlen="1" maxlen="64" allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_.{}[]" />
 				<actions>
 					<action function="set">tw_back=restore</action>
 					<action function="set">tw_action=cmd</action>
-					<action function="set">tw_action_param=cd %tw_backups_folder% && mv %tw_restore_name% %tw_backup_rename%</action>
+					<action function="set">tw_action_param=cd %tw_backups_folder% && mv &quot;%tw_restore_name%&quot; &quot;%tw_backup_rename%&quot;</action>
 					<action function="set">tw_text1=Rename Backup?</action>
 					<action function="set">tw_text2=This cannot be undone!</action>
 					<action function="set">tw_action_text1=Renaming Backup...</action>
@@ -2213,6 +2302,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%cancel_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Cancel</text>
@@ -2249,25 +2339,11 @@
 			<object type="template" name="progress_bar" />
 
 			<object type="action">
-				<conditions>
-					<condition var1="tw_operation_state" var2="1" />
-					<condition var1="tw_operation_status" var2="0" />
-				</conditions>
+				<condition var1="tw_operation_state" var2="1" />
 				<actions>
 					<action function="set">tw_back=restore_select</action>
 					<action function="set">tw_complete_text1=Restore Complete</action>
-					<action function="page">action_complete</action>
-				</actions>
-			</object>
-
-			<object type="action">
-				<conditions>
-					<condition var1="tw_operation_state" var2="1" />
-					<condition var1="tw_operation_status" var2="1" />
-				</conditions>
-				<actions>
-					<action function="set">tw_back=restore_select</action>
-					<action function="set">tw_complete_text1=Restore Complete</action>
+					<action function="set">tw_show_reboot=1</action>
 					<action function="page">action_complete</action>
 				</actions>
 			</object>
@@ -2297,21 +2373,13 @@
 			<object type="checkbox">
 				<placement x="%col1_x%" y="%row3_text_y%" />
 				<font resource="font" color="%text_color%" />
-				<text>Force MD5 check on all zips?</text>
-				<data variable="tw_force_md5_check" />
-				<image checked="checkbox_true" unchecked="checkbox_false" />
-			</object>
-
-			<object type="checkbox">
-				<placement x="%col1_x%" y="%row4_text_y%" />
-				<font resource="font" color="%text_color%" />
 				<text>Use rm -rf instead of formatting?</text>
 				<data variable="tw_rm_rf" />
 				<image checked="checkbox_true" unchecked="checkbox_false" />
 			</object>
 
 			<object type="checkbox">
-				<placement x="%col1_x%" y="%row5_text_y%" />
+				<placement x="%col1_x%" y="%row4_text_y%" />
 				<font resource="font" color="%text_color%" />
 				<text>Skip MD5 generation on backups</text>
 				<data variable="tw_skip_md5_generate" />
@@ -2319,7 +2387,7 @@
 			</object>
 
 			<object type="checkbox">
-				<placement x="%col1_x%" y="%row6_text_y%" />
+				<placement x="%col1_x%" y="%row5_text_y%" />
 				<font resource="font" color="%text_color%" />
 				<text>Enable MD5 checking of backup files</text>
 				<data variable="tw_skip_md5_check" />
@@ -2327,15 +2395,15 @@
 			</object>
 
 			<object type="checkbox">
-				<placement x="%col1_x%" y="%row7_text_y%" />
+				<placement x="%col1_x%" y="%row6_text_y%" />
 				<font resource="font" color="%text_color%" />
-				<text>Ignore image size errors during backup</text>
-				<data variable="tw_ignore_image_size" />
+				<text>Use Military Time</text>
+				<data variable="tw_military_time" />
 				<image checked="checkbox_true" unchecked="checkbox_false" />
 			</object>
 
 			<object type="checkbox">
-				<placement x="%col1_x%" y="%row8_text_y%" />
+				<placement x="%col1_x%" y="%row7_text_y%" />
 				<font resource="font" color="%text_color%" />
 				<text>Simulate most actions for theme testing</text>
 				<data variable="tw_simulate_actions" />
@@ -2344,7 +2412,7 @@
 
 			<object type="checkbox">
 				<condition var1="tw_simulate_actions" var2="1" />
-				<placement x="%col1_x%" y="%row9_text_y%" />
+				<placement x="%col1_x%" y="%row8_text_y%" />
 				<font resource="font" color="%text_color%" />
 				<text>Simulate failure for actions</text>
 				<data variable="tw_simulate_fail" />
@@ -2352,6 +2420,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Time Zone</text>
@@ -2360,6 +2429,16 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col4_x%" y="%row2_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Screen</text>
+				<image resource="main_button" />
+				<action function="page">screen</action>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%slider_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Restore Defaults</text>
@@ -2390,10 +2469,15 @@
 			</object>
 
 			<object type="listbox">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%listbox_x%" y="%listbox_y%" w="%listbox_width%" h="%listbox_tz_height%" />
+				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
+				<text>Select Time Zone:</text>
 				<icon selected="radio_true" unselected="radio_false" />
+				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<background color="%listbox_background%" />
-				<font resource="font" spacing="%listbox_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%listbox_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<data name="tw_time_zone_guisel" />
 				<listitem name="(UTC -11) Samoa, Midway Island">BST11;BDT</listitem>
 				<listitem name="(UTC -10) Hawaii">HST10;HDT</listitem>
@@ -2436,6 +2520,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_medium_x%" y="%row_offsetmedium_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>0</text>
@@ -2444,6 +2529,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_medium_x%" y="%row_offsetmedium_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>15</text>
@@ -2452,6 +2538,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col3_medium_x%" y="%row_offsetmedium_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>30</text>
@@ -2460,6 +2547,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col4_medium_x%" y="%row_offsetmedium_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>45</text>
@@ -2468,6 +2556,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col4_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Set Time Zone</text>
@@ -2494,6 +2583,75 @@
 			<object type="template" name="footer" />
 		</page>
 
+		<page name="screen">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5" />
+				<text>Screen Settings</text>
+			</object>
+
+			<object type="button">
+				<placement x="%slidervalue_x%" y="%row3_text_y%" />
+				<font resource="font" color="%text_color%" />
+				<condition var1="tw_screen_timeout_secs" op="=" var2="0" />
+				<condition var1="tw_no_screen_timeout" op="!=" var2="1" />
+				<text>Enable screen timeout.</text>
+				<image resource="checkbox_false" />
+				<action function="set">tw_screen_timeout_secs=60</action>
+			</object>
+
+			<object type="button">
+				<placement x="%slidervalue_x%" y="%row3_text_y%" />
+				<font resource="font" color="%text_color%" />
+				<condition var1="tw_screen_timeout_secs" op="!=" var2="0" />
+				<condition var1="tw_no_screen_timeout" op="!=" var2="1" />
+				<text>Enable screen timeout.</text>
+				<image resource="checkbox_true" />
+				<action function="set">tw_screen_timeout_secs=0</action>
+			</object>
+
+			<object type="slidervalue">
+				<condition var1="tw_screen_timeout_secs" op="!=" var2="0" />
+				<condition var1="tw_no_screen_timeout" op="!=" var2="1" />
+				<placement x="slidervalue_x" y="%row5_text_y%" w="%slidervalue_w%" />
+				<font resource="font" color="%text_color%" />
+				<colors line="%slidervalue_line_clr%" slider="%slidervalue_slider_clr%" />
+				<dimensions lineh="%slidervalue_lineh%" linepadding="%slidervalue_padding%" sliderw="%slidervalue_sliderw%" sliderh="%slidervalue_sliderh%" />
+				<text>Screen timeout in seconds:</text>
+				<data variable="tw_screen_timeout_secs" min="15" max="300" />
+			</object>
+
+			<object type="slidervalue">
+				<condition var1="tw_has_brightnesss_file" var2="1" />
+				<placement x="slidervalue_x" y="%row12_text_y%" w="%slidervalue_w%" />
+				<font resource="font" color="%text_color%" />
+				<colors line="%slidervalue_line_clr%" slider="%slidervalue_slider_clr%" />
+				<dimensions lineh="%slidervalue_lineh%" linepadding="%slidervalue_padding%" sliderw="%slidervalue_sliderw%" sliderh="%slidervalue_sliderh%" />
+				<text>Brightness: %tw_brightness_pct%%</text>
+				<data variable="tw_brightness_pct" min="10" max="100" />
+				<actions>
+					<action function="set">tw_brightness=%tw_brightness_max%</action>
+					<action function="compute">tw_brightness*%tw_brightness_pct%</action>
+					<action function="compute">tw_brightness/100</action>
+					<action function="cmd">echo %tw_brightness% > &quot;%tw_brightness_file%&quot;</action>
+				</actions>
+			</object>
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">settings</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
 		<page name="advanced">
 			<object type="template" name="header" />
 
@@ -2504,6 +2662,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Copy Log to SD</text>
@@ -2520,6 +2679,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Fix Permissions</text>
@@ -2528,16 +2688,16 @@
 					<action function="set">tw_back=advanced</action>
 					<action function="set">tw_action=fixpermissions</action>
 					<action function="set">tw_text1=Fix Permissions?</action>
-					<action function="set">tw_text2=This will take a few minutes.</action>
 					<action function="set">tw_action_text1=Fixing Permissions...</action>
-					<action function="set">tw_action_text2=This will take a few minutes.</action>
 					<action function="set">tw_complete_text1=Fix Permissions Complete</action>
 					<action function="set">tw_slider_text=Swipe to Confirm</action>
+					<action function="set">tw_show_reboot=1</action>
 					<action function="page">confirm_action</action>
 				</actions>
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col3_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Terminal Command</text>
@@ -2546,6 +2706,16 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col4_x%" y="%row1_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>ADB Sideload</text>
+				<image resource="main_button" />
+				<action function="page">sideload</action>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_allow_partition_sdcard" var2="1" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2555,6 +2725,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>File Manager</text>
@@ -2563,6 +2734,16 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col3_x%" y="%row2_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Reload Theme</text>
+				<image resource="main_button" />
+				<action function="reload"></action>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_show_dumlock" var2="1" />
 				<placement x="%col4_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2594,6 +2775,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_sdext_x%" y="%row1_sdext_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text></text>
@@ -2602,6 +2784,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_sdext_x%" y="%row1_sdext_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text></text>
@@ -2616,6 +2799,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_sdext_x%" y="%row2_sdext_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text></text>
@@ -2624,6 +2808,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_sdext_x%" y="%row2_sdext_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text></text>
@@ -2644,6 +2829,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_medium_x%" y="%row4_medium_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>EXT3</text>
@@ -2652,6 +2838,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_sdext_disable_ext4" var2="0" />
 				<placement x="%col3_medium_x%" y="%row4_medium_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2683,7 +2870,7 @@
 					<action function="set">tw_action2_param=tw_zip_location=/sdcard</action>
 					<action function="set">tw_action_text1=Partitioning SD Card...</action>
 					<action function="set">tw_action_text2=This will take a few minutes.</action>
-					<action function="set">tw_complete_text1=Fix Permissions Complete</action>
+					<action function="set">tw_complete_text1=Partitioning Complete</action>
 					<action function="page">action_page</action>
 				</actions>
 			</object>
@@ -2718,6 +2905,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_show_dumlock" var2="1" />
 				<placement x="%col1_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2735,6 +2923,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_show_dumlock" var2="1" />
 				<placement x="%col2_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2752,6 +2941,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_show_dumlock" var2="1" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2813,14 +3003,16 @@
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%fileselector_folder_x%" y="%fileselector_install_y%" w="%fileselector_folder_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>Folders:</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
-				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<filter folders="1" files="0" />
 				<path name="tw_file_location1" default="/sdcard" />
 				<data name="select" />
@@ -2828,14 +3020,16 @@
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%fileselector_file_x%" y="%fileselector_install_y%" w="%fileselector_file_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>%tw_file_location1%</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
-				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<filter folders="0" files="1" />
 				<path name="tw_file_location1" default="/" />
 				<data name="tw_filename1" />
@@ -2869,6 +3063,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%filemanager_select_x%" y="%filemanager_select_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Select Folder</text>
@@ -2900,6 +3095,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_fm_isfolder" var2="0" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2913,6 +3109,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_fm_isfolder" var2="1" />
 				<placement x="%col1_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2926,6 +3123,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col2_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Move</text>
@@ -2938,6 +3136,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col3_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>chmod 755</text>
@@ -2954,6 +3153,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col4_x%" y="%row2_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>chmod</text>
@@ -2969,6 +3169,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col1_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Delete</text>
@@ -2985,6 +3186,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_fm_isfolder" var2="0" />
 				<placement x="%col4_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -2999,6 +3201,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_fm_isfolder" var2="1" />
 				<placement x="%col4_x%" y="%row1_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -3035,12 +3238,14 @@
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%col2_x%" y="%fileselector_install_y%" w="%fileselector_folderonly_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>%tw_file_location2%</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
-				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
 				<filter folders="1" files="0" />
@@ -3061,6 +3266,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%filemanager_select_x%" y="%filemanager_select_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Select Folder</text>
@@ -3104,6 +3310,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%cancel_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Cancel</text>
@@ -3153,6 +3360,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%cancel_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Cancel</text>
@@ -3201,6 +3409,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%cancel_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Cancel</text>
@@ -3362,30 +3571,18 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%col_center_x%" y="%cancel_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Cancel</text>
 				<image resource="main_button" />
 				<actions>
+					<action function="set">tw_page_done=1</action>
 					<action function="page">main</action>
 				</actions>
 			</object>
 
 			<object type="template" name="keyboardtemplate" />
-
-			<object type="action">
-				<touch key="home" />
-				<actions>
-					<action function="page">main</action>
-				</actions>
-			</object>
-
-			<object type="action">
-				<touch key="back" />
-				<actions>
-					<action function="page">main</action>
-				</actions>
-			</object>
 
 			<object type="template" name="footer" />
 		</page>
@@ -3423,7 +3620,10 @@
 					<condition var1="tw_operation_state" var2="1" />
 					<condition var1="tw_operation_status" op="=" var2="0" />
 				</conditions>
-				<action function="page">main</action>
+				<actions>
+					<action function="set">tw_page_done=1</action>
+					<action function="page">main</action>
+				</actions>
 			</object>
 		</page>
 
@@ -3437,14 +3637,16 @@
 			</object>
 
 			<object type="fileselector">
+				<highlight color="%fileselector_highlight_color%" />
 				<placement x="%col2_x%" y="%fileselector_install_y%" w="%fileselector_folderonly_width%" h="%fileselector_install_height%" />
 				<header background="%fileselector_header_background%" textcolor="%fileselector_header_textcolor%" separatorcolor="%fileselector_header_separatorcolor%" separatorheight="%fileselector_header_separatorheight%" />
+				<fastscroll linecolor="%fastscroll_linecolor%" rectcolor="%fastscroll_rectcolor%" w="%fastscroll_w%" linew="%fastscroll_linew%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 				<text>%tw_terminal_location%</text>
 				<separator color="%fileselector_separatorcolor%" height="%fileselector_separatorheight%" />
 				<sort name="tw_gui_sort_order" />
 				<icon folder="folder_icon" file="file_icon" />
 				<background color="%fileselector_background%" />
-				<font resource="filelist" spacing="%fileselector_spacing%" color="%text_color%" />
+				<font resource="font" spacing="%fileselector_spacing%" color="%text_color%" highlightcolor="%fileselector_highlight_font_color%" />
 				<filter folders="1" files="0" />
 				<path name="tw_terminal_location" default="/" />
 				<data name="tw_terminal" />
@@ -3464,6 +3666,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%filemanager_select_x%" y="%filemanager_select_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text>Select Folder</text>
@@ -3504,6 +3707,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<condition var1="tw_terminal_state" var2="1" />
 				<placement x="%filemanager_select_x%" y="%terminal_button_y%" />
 				<font resource="font" color="%button_text_color%" />
@@ -3513,6 +3717,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%home_button_x%" y="%terminal_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text></text>
@@ -3522,6 +3727,7 @@
 			</object>
 
 			<object type="button">
+				<highlight color="%highlight_color%" />
 				<placement x="%back_button_x%" y="%terminal_button_y%" />
 				<font resource="font" color="%button_text_color%" />
 				<text></text>
@@ -3545,6 +3751,114 @@
 			<object type="action">
 				<touch key="back" />
 				<action function="page">terminalfolder</action>
+			</object>
+		</page>
+
+		<page name="sideload">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5"/>
+				<text>ADB Sideload</text>
+			</object>
+
+			<object type="checkbox">
+				<placement x="%col1_x%" y="%row3_text_y%" />
+				<font resource="font" color="%text_color%" />
+				<text>Wipe Dalvik Cache.</text>
+				<data variable="tw_wipe_dalvik" />
+				<image checked="checkbox_true" unchecked="checkbox_false" />
+			</object>
+
+			<object type="checkbox">
+				<placement x="%col1_x%" y="%row4_text_y%" />
+				<font resource="font" color="%text_color%" />
+				<text>Wipe Cache.</text>
+				<data variable="tw_wipe_cache" />
+				<image checked="checkbox_true" unchecked="checkbox_false" />
+			</object>
+
+			<object type="slider">
+				<placement x="%slider_x%" y="%slider_y%" />
+				<resource base="slider" used="slider-used" touch="slider-touch" />
+				<actions>
+					<action function="set">tw_back=advanced</action>
+					<action function="set">tw_action=adbsideload</action>
+					<action function="set">tw_action_text1=ADB Sideload</action>
+					<action function="set">tw_action_text2=Usage: adb sideload filename.zip</action>
+					<action function="set">tw_complete_text1=ADB Sideload Complete</action>
+					<action function="set">tw_has_cancel=1</action>
+					<action function="set">tw_show_reboot=1</action>
+					<action function="set">tw_cancel_action=adbsideloadcancel</action>
+					<action function="page">action_page</action>
+				</actions>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%slider_text_y%" placement="4" />
+				<text>Swipe to Start Sideload</text>
+			</object>
+
+			<object type="action">
+				<touch key="home" />
+				<action function="page">main</action>
+			</object>
+
+			<object type="action">
+				<touch key="back" />
+				<action function="page">advanced</action>
+			</object>
+
+			<object type="template" name="footer" />
+		</page>
+
+		<page name="installsu">
+			<object type="template" name="header" />
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row1_text_y%" placement="5"/>
+				<text>Install SuperSU?</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row2_text_y%" placement="5"/>
+				<text>Your device does not appear to be rooted.</text>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%row3_text_y%" placement="5"/>
+				<text>Install SuperSU now? This will root your device.</text>
+			</object>
+
+			<object type="button">
+				<highlight color="%highlight_color%" />
+				<placement x="%col_center_x%" y="%row2_medium_y%" />
+				<font resource="font" color="%button_text_color%" />
+				<text>Do Not Install</text>
+				<image resource="main_button" />
+				<action function="set">tw_page_done=1</action>
+			</object>
+
+			<object type="slider">
+				<placement x="%slider_x%" y="%slider_y%" />
+				<resource base="slider" used="slider-used" touch="slider-touch" />
+				<actions>
+					<action function="set">tw_action=installsu</action>
+					<action function="set">tw_action_text1=Installing SuperSU</action>
+					<action function="set">tw_action_text2=</action>
+					<action function="page">singleaction_page</action>
+				</actions>
+			</object>
+
+			<object type="text" color="%text_color%">
+				<font resource="font" />
+				<placement x="%center_x%" y="%slider_text_y%" placement="4" />
+				<text>Swipe to Install</text>
 			</object>
 		</page>
 	</pages>

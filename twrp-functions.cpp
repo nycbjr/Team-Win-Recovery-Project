@@ -35,53 +35,44 @@ extern "C" {
 }
 
 /* Execute a command */
-int TWFunc::Exec_Cmd(string cmd, string &result) {
-   int fd[2];
-   int ret = -1;
-   if(pipe(fd) < 0)
-		return -1;
-
-	pid_t pid = fork();
-	if (pid < 0)
-	{
-		close(fd[0]);
-		close(fd[1]);
-		return -1;
-	}
-
-	if(pid == 0) // child
-	{
-		close(fd[0]);
-		dup2(fd[1], 1);  // send stdout to the pipe
-		dup2(fd[1], 2);  // send stderr to the pipe
-		close(fd[1]);
-
-		ret = system(cmd.c_str());
-		if(ret != -1)
-			ret = WEXITSTATUS(ret);
-		else
-			LOGERR("Exec_Cmd: system() failed with -1 (%d)!\n", errno);
-		exit(ret);
-	}
-	else
-	{
-		close(fd[1]);
-
-		int len;
-		char buffer[128];
-		buffer[sizeof(buffer)-1] = 0;
-		while ((len = read(fd[0], buffer, sizeof(buffer)-1)) > 0)
-		{
-			buffer[len] = 0;
-			buffer[sizeof(buffer)-2] = '\n';
-			LOGINFO("%s", buffer);
+int TWFunc::Exec_Cmd(const string& cmd, string &result) {
+	FILE* exec;
+	char buffer[130];
+	int ret = 0;
+	exec = __popen(cmd.c_str(), "r");
+	if (!exec) return -1;
+	while(!feof(exec)) {
+		memset(&buffer, 0, sizeof(buffer));
+		if (fgets(buffer, 128, exec) != NULL) {
+			buffer[128] = '\n';
+			buffer[129] = NULL;
 			result += buffer;
 		}
-
-		waitpid(pid, &ret, 0);
-		return WEXITSTATUS(ret);
 	}
-	return -1;
+	ret = __pclose(exec);
+	return ret;
+}
+
+int TWFunc::Exec_Cmd(const string& cmd) {
+	pid_t pid;
+	int status;
+	switch(pid = fork())
+	{
+		case -1:
+			LOGERR("Exec_Cmd(): vfork failed!\n");
+			return -1;
+		case 0: // child
+			execl("/sbin/sh", "sh", "-c", cmd.c_str(), NULL);
+			_exit(127);
+			break;
+		default:
+		{
+			if (TWFunc::Wait_For_Child(pid, &status, cmd) != 0)
+				return -1;
+			else
+				return 0;
+		}
+	}
 }
 
 // Returns "file.name" from a full /path/to/file.name
@@ -161,21 +152,19 @@ void TWFunc::install_htc_dumlock(void) {
 }
 
 void TWFunc::htc_dumlock_restore_original_boot(void) {
-	string status;
 	if (!PartitionManager.Mount_By_Path("/sdcard", true))
 		return;
 
 	gui_print("Restoring original boot...\n");
-	Exec_Cmd("htcdumlock restore", status);
+	Exec_Cmd("htcdumlock restore");
 	gui_print("Original boot restored.\n");
 }
 
 void TWFunc::htc_dumlock_reflash_recovery_to_boot(void) {
-	string status;
 	if (!PartitionManager.Mount_By_Path("/sdcard", true))
 		return;
 	gui_print("Reflashing recovery to boot...\n");
-	Exec_Cmd("htcdumlock recovery noreboot", status);
+	Exec_Cmd("htcdumlock recovery noreboot");
 	gui_print("Recovery is flashed to boot.\n");
 }
 
@@ -216,7 +205,7 @@ unsigned long long TWFunc::Get_Folder_Size(const string& Path, bool Display_Erro
 
 	while ((de = readdir(d)) != NULL)
 	{
-		if (de->d_type == DT_DIR && strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0)
+		if (de->d_type == DT_DIR && strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0 && strcmp(de->d_name, "lost+found") != 0)
 		{
 			dutemp = Get_Folder_Size((Path + "/" + de->d_name), Display_Error);
 			dusize += dutemp;
@@ -368,11 +357,10 @@ void TWFunc::check_and_run_script(const char* script_file, const char* display_n
 {
 	// Check for and run startup script if script exists
 	struct stat st;
-	string result;
 	if (stat(script_file, &st) == 0) {
 		gui_print("Running %s script...\n", display_name);
 		chmod(script_file, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-		TWFunc::Exec_Cmd(script_file, result);
+		TWFunc::Exec_Cmd(script_file);
 		gui_print("\nFinished running %s script.\n", display_name);
 	}
 }
@@ -455,15 +443,17 @@ unsigned int TWFunc::Get_D_Type_From_Stat(string Path) {
 }
 
 int TWFunc::read_file(string fn, string& results) {
-        ifstream file;
-        file.open(fn.c_str(), ios::in);
-        if (file.is_open()) {
-                file >> results;
-                file.close();
-                return 0;
+	ifstream file;
+	file.open(fn.c_str(), ios::in);
+
+	if (file.is_open()) {
+		file >> results;
+		file.close();
+		return 0;
 	}
-        LOGINFO("Cannot find file %s\n", fn.c_str());
-        return -1;
+
+	LOGINFO("Cannot find file %s\n", fn.c_str());
+	return -1;
 }
 
 int TWFunc::read_file(string fn, vector<string>& results) {
@@ -529,7 +519,7 @@ timespec TWFunc::timespec_diff(timespec& start, timespec& end)
 	return temp;
 }
 
- int TWFunc::drop_caches(void) {
+int TWFunc::drop_caches(void) {
 	string file = "/proc/sys/vm/drop_caches";
 	string value = "3";
 	if (write_file(file, value) != 0)
@@ -589,6 +579,17 @@ bool TWFunc::Fix_su_Perms(void) {
 			return false;
 		}
 	}
+	file = "/system/xbin/daemonsu";
+	if (TWFunc::Path_Exists(file)) {
+		if (chown(file.c_str(), 0, 0) != 0) {
+			LOGERR("Failed to chown '%s'\n", file.c_str());
+			return false;
+		}
+		if (tw_chmod(file, "6755") != 0) {
+			LOGERR("Failed to chmod '%s'\n", file.c_str());
+			return false;
+		}
+	}
 	file = "/system/bin/.ext/.su";
 	if (TWFunc::Path_Exists(file)) {
 		if (chown(file.c_str(), 0, 0) != 0) {
@@ -596,6 +597,28 @@ bool TWFunc::Fix_su_Perms(void) {
 			return false;
 		}
 		if (tw_chmod(file, "6755") != 0) {
+			LOGERR("Failed to chmod '%s'\n", file.c_str());
+			return false;
+		}
+	}
+	file = "/system/etc/install-recovery.sh";
+	if (TWFunc::Path_Exists(file)) {
+		if (chown(file.c_str(), 0, 0) != 0) {
+			LOGERR("Failed to chown '%s'\n", file.c_str());
+			return false;
+		}
+		if (tw_chmod(file, "0755") != 0) {
+			LOGERR("Failed to chmod '%s'\n", file.c_str());
+			return false;
+		}
+	}
+	file = "/system/etc/init.d/99SuperSUDaemon";
+	if (TWFunc::Path_Exists(file)) {
+		if (chown(file.c_str(), 0, 0) != 0) {
+			LOGERR("Failed to chown '%s'\n", file.c_str());
+			return false;
+		}
+		if (tw_chmod(file, "0755") != 0) {
 			LOGERR("Failed to chmod '%s'\n", file.c_str());
 			return false;
 		}
@@ -617,100 +640,110 @@ bool TWFunc::Fix_su_Perms(void) {
 	return true;
 }
 
-int TWFunc::tw_chmod(string fn, string mode) {
+int TWFunc::tw_chmod(const string& fn, const string& mode) {
 	long mask = 0;
+	std::string::size_type n = mode.length();
+	int cls = 0;
 
-	for ( std::string::size_type n = 0; n < mode.length(); ++n) {
-		if (n == 0) {
+	if(n == 3)
+		++cls;
+	else if(n != 4)
+	{
+		LOGERR("TWFunc::tw_chmod used with %u long mode string (should be 3 or 4)!\n", mode.length());
+		return -1;
+	}
+
+	for (n = 0; n < mode.length(); ++n, ++cls) {
+		if (cls == 0) {
 			if (mode[n] == '0')
 				continue;
-			if (mode[n] == '1')
+			else if (mode[n] == '1')
 				mask |= S_ISVTX;
-			if (mode[n] == '2')
+			else if (mode[n] == '2')
 				mask |= S_ISGID;
-			if (mode[n] == '4')
+			else if (mode[n] == '4')
 				mask |= S_ISUID;
-			if (mode[n] == '5') {
+			else if (mode[n] == '5') {
 				mask |= S_ISVTX;
 				mask |= S_ISUID;
 			}
-			if (mode[n] == '6') {
+			else if (mode[n] == '6') {
 				mask |= S_ISGID;
 				mask |= S_ISUID;
 			}
-			if (mode[n] == '7') {
+			else if (mode[n] == '7') {
 				mask |= S_ISVTX;
 				mask |= S_ISGID;
 				mask |= S_ISUID;
 			}
 		}
-		else if (n == 1) {
+		else if (cls == 1) {
 			if (mode[n] == '7') {
 				mask |= S_IRWXU;
 			}
-			if (mode[n] == '6') {
+			else if (mode[n] == '6') {
 				mask |= S_IRUSR;
 				mask |= S_IWUSR;
 			}
-			if (mode[n] == '5') {
+			else if (mode[n] == '5') {
 				mask |= S_IRUSR;
 				mask |= S_IXUSR;
 			}
-			if (mode[n] == '4')
+			else if (mode[n] == '4')
 				mask |= S_IRUSR;
-			if (mode[n] == '3') {
+			else if (mode[n] == '3') {
 				mask |= S_IWUSR;
 				mask |= S_IRUSR;
 			}
-			if (mode[n] == '2')
+			else if (mode[n] == '2')
 				mask |= S_IWUSR;
-			if (mode[n] == '1')
+			else if (mode[n] == '1')
 				mask |= S_IXUSR;
 		}
-		else if (n == 2) {
+		else if (cls == 2) {
 			if (mode[n] == '7') {
 				mask |= S_IRWXG;
 			}
-			if (mode[n] == '6') {
+			else if (mode[n] == '6') {
 				mask |= S_IRGRP;
 				mask |= S_IWGRP;
 			}
-			if (mode[n] == '5') {
+			else if (mode[n] == '5') {
 				mask |= S_IRGRP;
 				mask |= S_IXGRP;
 			}
-			if (mode[n] == '4')
+			else if (mode[n] == '4')
 				mask |= S_IRGRP;
-			if (mode[n] == '3') {
+			else if (mode[n] == '3') {
 				mask |= S_IWGRP;
 				mask |= S_IXGRP;
 			}
-			if (mode[n] == '2')
+			else if (mode[n] == '2')
 				mask |= S_IWGRP;
-			if (mode[n] == '1')
+			else if (mode[n] == '1')
 				mask |= S_IXGRP;
 		}
-		else if (n == 3) {
+		else if (cls == 3) {
 			if (mode[n] == '7') {
 				mask |= S_IRWXO;
 			}
-			if (mode[n] == '6') {
+			else if (mode[n] == '6') {
 				mask |= S_IROTH;
 				mask |= S_IWOTH;
 			}
-			if (mode[n] == '5') {
+			else if (mode[n] == '5') {
 				mask |= S_IROTH;
 				mask |= S_IXOTH;
 			}
-			if (mode[n] == '4')
-					mask |= S_IROTH;
-			if (mode[n] == '3') {
+			else if (mode[n] == '4')
+				mask |= S_IROTH;
+			else if (mode[n] == '3') {
 				mask |= S_IWOTH;
 				mask |= S_IXOTH;
 			}
-			if (mode[n] == '2')
+			else if (mode[n] == '2')
 				mask |= S_IWOTH;
-			if (mode[n] == '1')
+			else if (mode[n] == '1')
 				mask |= S_IXOTH;
 		}
 	}
@@ -727,9 +760,36 @@ bool TWFunc::Install_SuperSU(void) {
 	if (!PartitionManager.Mount_By_Path("/system", true))
 		return false;
 
+	TWFunc::Exec_Cmd("/sbin/chattr -i /system/xbin/su");
 	if (copy_file("/supersu/su", "/system/xbin/su", 0755) != 0) {
 		LOGERR("Failed to copy su binary to /system/bin\n");
 		return false;
+	}
+	if (!Path_Exists("/system/bin/.ext")) {
+		mkdir("/system/bin/.ext", 0777);
+	}
+	TWFunc::Exec_Cmd("/sbin/chattr -i /system/bin/.ext/su");
+	if (copy_file("/supersu/su", "/system/bin/.ext/su", 0755) != 0) {
+		LOGERR("Failed to copy su binary to /system/bin/.ext/su\n");
+		return false;
+	}
+	TWFunc::Exec_Cmd("/sbin/chattr -i /system/xbin/daemonsu");
+	if (copy_file("/supersu/su", "/system/xbin/daemonsu", 0755) != 0) {
+		LOGERR("Failed to copy su binary to /system/xbin/daemonsu\n");
+		return false;
+	}
+	if (Path_Exists("/system/etc/init.d")) {
+		TWFunc::Exec_Cmd("/sbin/chattr -i /system/etc/init.d/99SuperSUDaemon");
+		if (copy_file("/supersu/99SuperSUDaemon", "/system/etc/init.d/99SuperSUDaemon", 0755) != 0) {
+			LOGERR("Failed to copy 99SuperSUDaemon to /system/etc/init.d/99SuperSUDaemon\n");
+			return false;
+		}
+	} else {
+		TWFunc::Exec_Cmd("/sbin/chattr -i /system/etc/install-recovery.sh");
+		if (copy_file("/supersu/install-recovery.sh", "/system/etc/install-recovery.sh", 0755) != 0) {
+			LOGERR("Failed to copy install-recovery.sh to /system/etc/install-recovery.sh\n");
+			return false;
+		}
 	}
 	if (copy_file("/supersu/Superuser.apk", "/system/app/Superuser.apk", 0644) != 0) {
 		LOGERR("Failed to copy Superuser app to /system/app\n");
@@ -744,7 +804,7 @@ int TWFunc::Get_File_Type(string fn) {
 	string::size_type i = 0;
 	int firstbyte = 0, secondbyte = 0;
 	char header[3];
-        
+
 	ifstream f;
 	f.open(fn.c_str(), ios::in | ios::binary);
 	f.get(header, 3);
@@ -752,13 +812,12 @@ int TWFunc::Get_File_Type(string fn) {
 	firstbyte = header[i] & 0xff;
 	secondbyte = header[++i] & 0xff;
 
-	if (firstbyte == 0x1f && secondbyte == 0x8b) {
+	if (firstbyte == 0x1f && secondbyte == 0x8b)
 		return 1; // Compressed
-	} else if (firstbyte == 0x4f && secondbyte == 0x41) {
+	else if (firstbyte == 0x4f && secondbyte == 0x41)
 		return 2; // Encrypted
-	} else {
+	else
 		return 0; // Unknown
-	}
 
 	return 0;
 }
@@ -907,4 +966,53 @@ int TWFunc::Wait_For_Child(pid_t pid, int *status, string Child_Name) {
 		}
 	}
 	return 0;
+}
+
+string TWFunc::Get_Current_Date() {
+	string Current_Date;
+	time_t seconds = time(0);
+	struct tm *t = localtime(&seconds);
+	char timestamp[255];
+	sprintf(timestamp,"%04d-%02d-%02d--%02d-%02d-%02d",t->tm_year+1900,t->tm_mon+1,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec);
+	Current_Date = timestamp;
+	return Current_Date;
+}
+
+void TWFunc::Auto_Generate_Backup_Name() {
+	bool mount_state = PartitionManager.Is_Mounted_By_Path("/system");
+	std::vector<string> buildprop;
+	if (!PartitionManager.Mount_By_Path("/system", true)) {
+		DataManager::SetValue(TW_BACKUP_NAME, Get_Current_Date());
+		return;
+	}
+	if (TWFunc::read_file("/system/build.prop", buildprop) != 0) {
+		LOGINFO("Unable to open /system/build.prop for getting backup name.\n");
+		DataManager::SetValue(TW_BACKUP_NAME, Get_Current_Date());
+		if (!mount_state)
+			PartitionManager.UnMount_By_Path("/system", false);
+		return;
+	}
+	int line_count = buildprop.size();
+	int index;
+	size_t start_pos = 0, end_pos;
+	string propname, propvalue;
+	for (index = 0; index < line_count; index++) {
+		end_pos = buildprop.at(index).find("=", start_pos);
+		propname = buildprop.at(index).substr(start_pos, end_pos);
+		if (propname == "ro.build.display.id") {
+			propvalue = buildprop.at(index).substr(end_pos + 1, buildprop.at(index).size());
+			string Backup_Name = Get_Current_Date();
+			Backup_Name += " " + propvalue;
+			if (Backup_Name.size() > MAX_BACKUP_NAME_LEN)
+				Backup_Name.resize(MAX_BACKUP_NAME_LEN);
+			DataManager::SetValue(TW_BACKUP_NAME, Backup_Name);
+			break;
+		}
+	}
+	if (propvalue.empty()) {
+		LOGINFO("ro.build.display.id not found in build.prop\n");
+		DataManager::SetValue(TW_BACKUP_NAME, Get_Current_Date());
+	}
+	if (!mount_state)
+		PartitionManager.UnMount_By_Path("/system", false);
 }

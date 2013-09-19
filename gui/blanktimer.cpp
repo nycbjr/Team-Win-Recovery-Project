@@ -20,7 +20,6 @@ using namespace std;
 #include "rapidxml.hpp"
 using namespace rapidxml;
 extern "C" {
-#include "../minzip/Zip.h"
 #include "../minuitwrp/minui.h"
 }
 #include <string>
@@ -37,9 +36,15 @@ extern "C" {
 #include <sstream>
 #include "pages.hpp"
 #include "blanktimer.hpp"
+#include "objects.hpp"
 #include "../data.hpp"
 extern "C" {
 #include "../twcommon.h"
+#ifdef HAVE_SELINUX
+#include "../minzip/Zip.h"
+#else
+#include "../minzipold/Zip.h"
+#endif
 }
 #include "../twrp-functions.hpp"
 #include "../variables.h"
@@ -98,6 +103,7 @@ int  blanktimer::setClockTimer(void) {
 			setConBlank(2);
 			setBrightness(0);
 			screenoff = true;
+			TWFunc::check_and_run_script("/sbin/postscreenblank.sh", "blank");
 			PageManager::ChangeOverlay("lock");
 		}
 #ifndef TW_NO_SCREEN_BLANK
@@ -149,6 +155,7 @@ void blanktimer::resetTimerAndUnblank(void) {
 				break;
 			}
 #endif
+			TWFunc::check_and_run_script("/sbin/postscreenunblank.sh", "unblank");
 			// No break here, we want to keep going
 		case 2:
 			gui_forceRender();

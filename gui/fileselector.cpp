@@ -1,4 +1,20 @@
-// FileSelector.cpp - GUIFileSelector object
+/*
+	Copyright 2012 bigbiff/Dees_Troy TeamWin
+	This file is part of TWRP/TeamWin Recovery Project.
+
+	TWRP is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	TWRP is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with TWRP.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <linux/input.h>
 #include <pthread.h>
@@ -22,15 +38,14 @@
 #include <algorithm>
 
 extern "C" {
-#include "../common.h"
-#include "../roots.h"
+#include "../twcommon.h"
 #include "../minuitwrp/minui.h"
-#include "../recovery_ui.h"
 }
 
 #include "rapidxml.hpp"
 #include "objects.hpp"
 #include "../data.hpp"
+#include "../twrp-functions.hpp"
 
 #define TW_FILESELECTOR_UP_A_LEVEL "(Up A Level)"
 
@@ -52,6 +67,8 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node)
 	mFolderIcon = mFileIcon = mBackground = mFont = mHeaderIcon = NULL;
 	mBackgroundX = mBackgroundY = mBackgroundW = mBackgroundH = 0;
 	mShowFolders = mShowFiles = mShowNavFolders = 1;
+	mFastScrollW = mFastScrollLineW = mFastScrollRectW = mFastScrollRectH = 0;
+	mFastScrollRectX = mFastScrollRectY = -1;
 	mUpdate = 0;
 	touchDebounce = 6;
 	mPathVar = "cwd";
@@ -61,6 +78,13 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node)
 	ConvertStrToColor("black", &mHeaderSeparatorColor);
 	ConvertStrToColor("white", &mFontColor);
 	ConvertStrToColor("white", &mHeaderFontColor);
+	ConvertStrToColor("white", &mFastScrollLineColor);
+	ConvertStrToColor("white", &mFastScrollRectColor);
+	hasHighlightColor = false;
+	hasFontHighlightColor = false;
+	isHighlighted = false;
+	updateFileList = false;
+	startSelection = -1;
 
 	// Load header text
 	child = node->first_node("header");
@@ -100,6 +124,17 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node)
 	}
 	child = node->first_node("text");
 	if (child)  mHeaderText = child->value();
+
+	memset(&mHighlightColor, 0, sizeof(COLOR));
+	child = node->first_node("highlight");
+	if (child) {
+		attr = child->first_attribute("color");
+		if (attr) {
+			hasHighlightColor = true;
+			std::string color = attr->value();
+			ConvertStrToColor(color, &mHighlightColor);
+		}
+	}
 
 	// Simple way to check for static state
 	mLastValue = gui_parse_text(mHeaderText);
@@ -159,6 +194,15 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node)
 		if (attr) {
 			string parsevalue = gui_parse_text(attr->value());
 			mLineSpacing = atoi(parsevalue.c_str());
+		}
+
+		attr = child->first_attribute("highlightcolor");
+		memset(&mFontHighlightColor, 0, sizeof(COLOR));
+		if (attr)
+		{
+			std::string color = attr->value();
+			ConvertStrToColor(color, &mFontHighlightColor);
+			hasFontHighlightColor = true;
 		}
 	}
 
@@ -251,6 +295,43 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node)
 	} else
 		mSelection = "0";
 
+	// Fast scroll colors
+	child = node->first_node("fastscroll");
+	if (child)
+	{
+		attr = child->first_attribute("linecolor");
+		if(attr)
+			ConvertStrToColor(attr->value(), &mFastScrollLineColor);
+
+		attr = child->first_attribute("rectcolor");
+		if(attr)
+			ConvertStrToColor(attr->value(), &mFastScrollRectColor);
+
+		attr = child->first_attribute("w");
+		if (attr) {
+			string parsevalue = gui_parse_text(attr->value());
+			mFastScrollW = atoi(parsevalue.c_str());
+		}
+
+		attr = child->first_attribute("linew");
+		if (attr) {
+			string parsevalue = gui_parse_text(attr->value());
+			mFastScrollLineW = atoi(parsevalue.c_str());
+		}
+
+		attr = child->first_attribute("rectw");
+		if (attr) {
+			string parsevalue = gui_parse_text(attr->value());
+			mFastScrollRectW = atoi(parsevalue.c_str());
+		}
+
+		attr = child->first_attribute("recth");
+		if (attr) {
+			string parsevalue = gui_parse_text(attr->value());
+			mFastScrollRectH = atoi(parsevalue.c_str());
+		}
+	}
+
 	// Retrieve the line height
 	gr_getFontDetails(mFont ? mFont->GetResource() : NULL, &mFontHeight, NULL);
 	mLineHeight = mFontHeight;
@@ -302,10 +383,7 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node)
 	// Fetch the file/folder list
 	std::string value;
 	DataManager::GetValue(mPathVar, value);
-	if (GetFileList(value) != 0 && (mShowNavFolders != 0 || mShowFiles != 0)) {
-		GetFileList(DataManager::GetCurrentStoragePath());
-		DataManager::SetValue(mPathVar, DataManager::GetCurrentStoragePath());
-	}
+	GetFileList(value);
 }
 
 GUIFileSelector::~GUIFileSelector()
@@ -326,6 +404,16 @@ int GUIFileSelector::Render(void)
 		gr_blit(mBackground->GetResource(), 0, 0, mBackgroundW, mBackgroundH, mBackgroundX, mBackgroundY);
 	}
 
+	// Update the file list if needed
+	if (updateFileList) {
+		string value;
+		DataManager::GetValue(mPathVar, value);
+		if (GetFileList(value) == 0)
+			updateFileList = false;
+		else
+			return 0;
+	}
+
 	// This tells us how many lines we can actually render
 	int lines = (mRenderH - mHeaderH) / (actualLineHeight);
 	int line;
@@ -333,10 +421,14 @@ int GUIFileSelector::Render(void)
 	int folderSize = mShowFolders ? mFolderList.size() : 0;
 	int fileSize = mShowFiles ? mFileList.size() : 0;
 
+	int listW = mRenderW;
+
 	if (folderSize + fileSize < lines) {
 		lines = folderSize + fileSize;
 		scrollingY = 0;
+		mFastScrollRectX = mFastScrollRectY = -1;
 	} else {
+		listW -= mFastScrollW; // space for fast scroll
 		lines++;
 		if (lines < folderSize + fileSize)
 			lines++;
@@ -351,14 +443,39 @@ int GUIFileSelector::Render(void)
 	int currentIconOffsetY = 0, currentIconOffsetX = 0;
 	int folderIconOffsetY = (int)((actualLineHeight - mFolderIconHeight) / 2), fileIconOffsetY = (int)((actualLineHeight - mFileIconHeight) / 2);
 	int folderIconOffsetX = (mIconWidth - mFolderIconWidth) / 2, fileIconOffsetX = (mIconWidth - mFileIconWidth) / 2;
+	int actualSelection = mStart;
+
+	if (isHighlighted) {
+		int selectY = scrollingY;
+
+		// Locate the correct line for highlighting
+		while (selectY + actualLineHeight < startSelection) {
+			selectY += actualLineHeight;
+			actualSelection++;
+		}
+		if (hasHighlightColor) {
+			// Highlight the area
+			gr_color(mHighlightColor.red, mHighlightColor.green, mHighlightColor.blue, 255);
+			int HighlightHeight = actualLineHeight;
+			if (mRenderY + mHeaderH + selectY + actualLineHeight > mRenderH + mRenderY) {
+				HighlightHeight = actualLineHeight - (mRenderY + mHeaderH + selectY + actualLineHeight - mRenderH - mRenderY);
+			}
+			gr_fill(mRenderX, mRenderY + mHeaderH + selectY, mRenderW, HighlightHeight);
+		}
+	}
 
 	for (line = 0; line < lines; line++)
 	{
 		Resource* icon;
 		std::string label;
 
-		// Set the color for the font
-		gr_color(mFontColor.red, mFontColor.green, mFontColor.blue, 255);
+		if (isHighlighted && hasFontHighlightColor && line + mStart == actualSelection) {
+			// Use the highlight color for the font
+			gr_color(mFontHighlightColor.red, mFontHighlightColor.green, mFontHighlightColor.blue, 255);
+		} else {
+			// Set the color for the font
+			gr_color(mFontColor.red, mFontColor.green, mFontColor.blue, 255);
+		}
 
 		if (line + mStart < folderSize)
 		{
@@ -390,12 +507,12 @@ int GUIFileSelector::Render(void)
 				rect_y = currentIconHeight;
 			gr_blit(icon->GetResource(), 0, 0, currentIconWidth, rect_y, mRenderX + currentIconOffsetX, image_y);
 		}
-		gr_textExWH(mRenderX + mIconWidth + 5, yPos + fontOffsetY, label.c_str(), fontResource, mRenderX + mRenderW, mRenderY + mRenderH);
+		gr_textExWH(mRenderX + mIconWidth + 5, yPos + fontOffsetY, label.c_str(), fontResource, mRenderX + listW, mRenderY + mRenderH);
 
 		// Add the separator
 		if (yPos + actualLineHeight < mRenderH + mRenderY) {
 			gr_color(mSeparatorColor.red, mSeparatorColor.green, mSeparatorColor.blue, 255);
-			gr_fill(mRenderX, yPos + actualLineHeight - mSeparatorH, mRenderW, mSeparatorH);
+			gr_fill(mRenderX, yPos + actualLineHeight - mSeparatorH, listW, mSeparatorH);
 		}
 
 		// Move the yPos
@@ -430,7 +547,31 @@ int GUIFileSelector::Render(void)
 		gr_fill(mRenderX, yPos + mHeaderH - mHeaderSeparatorH, mRenderW, mHeaderSeparatorH);
 	}
 
-	mUpdate = 0;
+	// render fast scroll
+	lines = (mRenderH - mHeaderH) / (actualLineHeight);
+	if(mFastScrollW > 0 && folderSize + fileSize > lines)
+	{
+		int startX = listW + mRenderX;
+		int fWidth = mRenderW - listW;
+		int fHeight = mRenderH - mHeaderH;
+
+		// line
+		gr_color(mFastScrollLineColor.red, mFastScrollLineColor.green, mFastScrollLineColor.blue, 255);
+		gr_fill(startX + fWidth/2, mRenderY + mHeaderH, mFastScrollLineW, mRenderH - mHeaderH);
+
+		// rect
+		int pct = ((mStart*actualLineHeight - scrollingY)*100)/((folderSize + fileSize)*actualLineHeight-lines*actualLineHeight);
+		mFastScrollRectX = startX + (fWidth - mFastScrollRectW)/2;
+		mFastScrollRectY = mRenderY+mHeaderH + ((fHeight - mFastScrollRectH)*pct)/100;
+
+		gr_color(mFastScrollRectColor.red, mFastScrollRectColor.green, mFastScrollRectColor.blue, 255);
+		gr_fill(mFastScrollRectX, mFastScrollRectY, mFastScrollRectW, mFastScrollRectH);
+	}
+
+	// If a change came in during the render then we need to do another redraw so leave mUpdate alone if updateFileList is true.
+	if (!updateFileList) {
+		mUpdate = 0;
+	}
 	return 0;
 }
 
@@ -510,13 +651,14 @@ int GUIFileSelector::Update(void)
 int GUIFileSelector::GetSelection(int x, int y)
 {
 	// We only care about y position
-	if (y < mRenderY || y - mRenderY <= mHeaderH || y - mRenderY > mRenderH) return -1;
+	if (y < mRenderY || y - mRenderY <= mHeaderH || y - mRenderY > mRenderH)
+		return -1;
+
 	return (y - mRenderY - mHeaderH);
 }
 
 int GUIFileSelector::NotifyTouch(TOUCH_STATE state, int x, int y)
 {
-	static int startSelection = -1;
 	static int lastY = 0, last2Y = 0;
 	int selection = 0;
 
@@ -527,22 +669,57 @@ int GUIFileSelector::NotifyTouch(TOUCH_STATE state, int x, int y)
 			startSelection = -1;
 		else
 			startSelection = GetSelection(x,y);
+		isHighlighted = (startSelection > -1);
+		if (isHighlighted)
+			mUpdate = 1;
 		startY = lastY = last2Y = y;
 		scrollingSpeed = 0;
 		break;
-
 	case TOUCH_DRAG:
 		// Check if we dragged out of the selection window
 		if (GetSelection(x, y) == -1) {
 			last2Y = lastY = 0;
+			if (isHighlighted) {
+				isHighlighted = false;
+				mUpdate = 1;
+			}
+			break;
+		}
+
+		// Fast scroll
+		if(mFastScrollRectX != -1 && x >= mRenderX + mRenderW - mFastScrollW)
+		{
+			int pct = ((y-mRenderY-mHeaderH)*100)/(mRenderH-mHeaderH);
+			int totalSize = (mShowFolders ? mFolderList.size() : 0) + (mShowFiles ? mFileList.size() : 0);
+			int lines = (mRenderH - mHeaderH) / (actualLineHeight);
+
+			float l = float((totalSize-lines)*pct)/100;
+			if(l + lines >= totalSize)
+			{
+				mStart = totalSize - lines;
+				scrollingY = 0;
+			}
+			else
+			{
+				mStart = l;
+				scrollingY = -(l - int(l))*actualLineHeight;
+			}
+
+			startSelection = -1;
+			mUpdate = 1;
+			scrollingSpeed = 0;
+			isHighlighted = false;
 			break;
 		}
 
 		// Provide some debounce on initial touches
 		if (startSelection != -1 && abs(y - startY) < touchDebounce) {
+			isHighlighted = true;
+			mUpdate = 1;
 			break;
 		}
 
+		isHighlighted = false;
 		last2Y = lastY;
 		lastY = y;	
 		startSelection = -1;
@@ -583,6 +760,7 @@ int GUIFileSelector::NotifyTouch(TOUCH_STATE state, int x, int y)
 		break;
 
 	case TOUCH_RELEASE:
+		isHighlighted = false;
 		if (startSelection >= 0)
 		{
 			// We've selected an item!
@@ -640,12 +818,6 @@ int GUIFileSelector::NotifyTouch(TOUCH_STATE state, int x, int y)
 					else
 					{
 						DataManager::SetValue(mPathVar, cwd);
-						if (GetFileList(cwd) != 0)
-						{
-							LOGE("Unable to change folders.\n");
-							DataManager::SetValue(mPathVar, oldcwd);
-							GetFileList(oldcwd);
-						}
 						mStart = 0;
 						scrollingY = 0;
 						mUpdate = 1;
@@ -680,8 +852,7 @@ int GUIFileSelector::NotifyTouch(TOUCH_STATE state, int x, int y)
 
 int GUIFileSelector::NotifyVarChange(std::string varName, std::string value)
 {
-	if (varName.empty())
-	{
+	if (varName.empty()) {
 		// Always clear the data variable so we know to use it
 		DataManager::SetValue(mVariable, "");
 	}
@@ -697,12 +868,13 @@ int GUIFileSelector::NotifyVarChange(std::string varName, std::string value)
 	}
 	if (varName == mPathVar || varName == mSortVariable)
 	{
-		DataManager::GetValue(mPathVar, value);  // sometimes the value will be the sort order instead of the path, so we read the path everytime
-		DataManager::GetValue(mSortVariable, mSortOrder);
+		if (varName == mSortVariable) {
+			DataManager::GetValue(mSortVariable, mSortOrder);
+		}
+		updateFileList = true;
 		mStart = 0;
 		scrollingY = 0;
 		scrollingSpeed = 0;
-		GetFileList(value);
 		mUpdate = 1;
 		return 0;
 	}
@@ -738,19 +910,19 @@ bool GUIFileSelector::fileSort(FileData d1, FileData d2)
 		case 3: // by size largest first
 			if (d1.fileSize == d2.fileSize || d1.fileType == DT_DIR) // some directories report a different size than others - but this is not the size of the files inside the directory, so we just sort by name on directories
 				return (strcasecmp(d1.fileName.c_str(), d2.fileName.c_str()) < 0);
-			return d1.fileSize > d2.fileSize;
+			return d1.fileSize < d2.fileSize;
 		case -3: // by size smallest first
 			if (d1.fileSize == d2.fileSize || d1.fileType == DT_DIR) // some directories report a different size than others - but this is not the size of the files inside the directory, so we just sort by name on directories
 				return (strcasecmp(d1.fileName.c_str(), d2.fileName.c_str()) > 0);
-			return d1.fileSize < d2.fileSize;
+			return d1.fileSize > d2.fileSize;
 		case 2: // by last modified date newest first
 			if (d1.lastModified == d2.lastModified)
 				return (strcasecmp(d1.fileName.c_str(), d2.fileName.c_str()) < 0);
-			return d1.lastModified > d2.lastModified;
+			return d1.lastModified < d2.lastModified;
 		case -2: // by date oldest first
 			if (d1.lastModified == d2.lastModified)
 				return (strcasecmp(d1.fileName.c_str(), d2.fileName.c_str()) > 0);
-			return d1.lastModified < d2.lastModified;
+			return d1.lastModified > d2.lastModified;
 		case -1: // by name descending
 			return (strcasecmp(d1.fileName.c_str(), d2.fileName.c_str()) > 0);
 		default: // should be a 1 - sort by name ascending
@@ -771,7 +943,18 @@ int GUIFileSelector::GetFileList(const std::string folder)
 	d = opendir(folder.c_str());
 	if (d == NULL)
 	{
-		LOGI("Unable to open '%s'\n", folder.c_str());
+		LOGINFO("Unable to open '%s'\n", folder.c_str());
+		if (folder != "/" && (mShowNavFolders != 0 || mShowFiles != 0)) {
+			size_t found;
+			found = folder.find_last_of('/');
+			if (found != string::npos) {
+				string new_folder = folder.substr(0, found);
+
+				if (new_folder.length() < 2)
+					new_folder = "/";
+				DataManager::SetValue(mPathVar, new_folder);
+			}
+		}
 		return -1;
 	}
 
@@ -784,9 +967,12 @@ int GUIFileSelector::GetFileList(const std::string folder)
 			continue;
 		if (data.fileName == ".." && folder == "/")
 			continue;
-		if (data.fileName == "..")
+		if (data.fileName == "..") {
 			data.fileName = TW_FILESELECTOR_UP_A_LEVEL;
-		data.fileType = de->d_type;
+			data.fileType = DT_DIR;
+		} else {
+			data.fileType = de->d_type;
+		}
 
 		std::string path = folder + "/" + data.fileName;
 		stat(path.c_str(), &st);
@@ -798,12 +984,15 @@ int GUIFileSelector::GetFileList(const std::string folder)
 		data.lastModified = st.st_mtime;
 		data.lastStatChange = st.st_ctime;
 
+		if (data.fileType == DT_UNKNOWN) {
+			data.fileType = TWFunc::Get_D_Type_From_Stat(path);
+		}
 		if (data.fileType == DT_DIR)
 		{
 			if (mShowNavFolders || (data.fileName != "." && data.fileName != TW_FILESELECTOR_UP_A_LEVEL))
 				mFolderList.push_back(data);
 		}
-		else if (data.fileType == DT_REG)
+		else if (data.fileType == DT_REG || data.fileType == DT_LNK || data.fileType == DT_BLK)
 		{
 			if (mExtn.empty() || (data.fileName.length() > mExtn.length() && data.fileName.substr(data.fileName.length() - mExtn.length()) == mExtn))
 			{
@@ -815,6 +1004,7 @@ int GUIFileSelector::GetFileList(const std::string folder)
 
 	std::sort(mFolderList.begin(), mFolderList.end(), fileSort);
 	std::sort(mFileList.begin(), mFileList.end(), fileSort);
+
 	return 0;
 }
 
@@ -822,12 +1012,9 @@ void GUIFileSelector::SetPageFocus(int inFocus)
 {
 	if (inFocus)
 	{
-		std::string value;
-		DataManager::GetValue(mPathVar, value);
-		if (GetFileList(value) != 0 && (mShowNavFolders != 0 || mShowFiles != 0)) {
-			GetFileList(DataManager::GetCurrentStoragePath());
-			DataManager::SetValue(mPathVar, DataManager::GetCurrentStoragePath());
-		}
+		updateFileList = true;
+		scrollingY = 0;
+		scrollingSpeed = 0;
+		mUpdate = 1;
 	}
 }
-

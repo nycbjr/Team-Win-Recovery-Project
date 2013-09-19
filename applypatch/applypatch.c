@@ -30,10 +30,17 @@
 #include "mtdutils/mtdutils.h"
 #include "edify/expr.h"
 
-int SaveFileContents(const char* filename, FileContents file);
 static int LoadPartitionContents(const char* filename, FileContents* file);
-int ParseSha1(const char* str, uint8_t* digest);
 static ssize_t FileSink(unsigned char* data, ssize_t len, void* token);
+static int GenerateTarget(FileContents* source_file,
+                          const Value* source_patch_value,
+                          FileContents* copy_file,
+                          const Value* copy_patch_value,
+                          const char* source_filename,
+                          const char* target_filename,
+                          const uint8_t target_sha1[SHA_DIGEST_SIZE],
+                          size_t target_size,
+                          const Value* bonus_data);
 
 static int mtd_partitions_scanned = 0;
 
@@ -111,11 +118,6 @@ static int compare_size_indices(const void* a, const void* b) {
     } else {
         return 0;
     }
-}
-
-void FreeFileContents(FileContents* file) {
-    if (file) free(file->data);
-    free(file);
 }
 
 // Load the contents of an MTD or EMMC partition into the provided
@@ -322,18 +324,18 @@ static int LoadPartitionContents(const char* filename, FileContents* file) {
 
 // Save the contents of the given FileContents object under the given
 // filename.  Return 0 on success.
-int SaveFileContents(const char* filename, FileContents file) {
-    int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
+int SaveFileContents(const char* filename, const FileContents* file) {
+    int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         printf("failed to open \"%s\" for write: %s\n",
                filename, strerror(errno));
         return -1;
     }
 
-    ssize_t bytes_written = FileSink(file.data, file.size, &fd);
-    if (bytes_written != file.size) {
+    ssize_t bytes_written = FileSink(file->data, file->size, &fd);
+    if (bytes_written != file->size) {
         printf("short write of \"%s\" (%ld bytes of %ld) (%s)\n",
-               filename, (long)bytes_written, (long)file.size,
+               filename, (long)bytes_written, (long)file->size,
                strerror(errno));
         close(fd);
         return -1;
@@ -341,11 +343,11 @@ int SaveFileContents(const char* filename, FileContents file) {
     fsync(fd);
     close(fd);
 
-    if (chmod(filename, file.st.st_mode) != 0) {
+    if (chmod(filename, file->st.st_mode) != 0) {
         printf("chmod of \"%s\" failed: %s\n", filename, strerror(errno));
         return -1;
     }
-    if (chown(filename, file.st.st_uid, file.st.st_gid) != 0) {
+    if (chown(filename, file->st.st_uid, file->st.st_gid) != 0) {
         printf("chown of \"%s\" failed: %s\n", filename, strerror(errno));
         return -1;
     }
@@ -419,18 +421,111 @@ int WriteToPartition(unsigned char* data, size_t len,
             break;
 
         case EMMC:
-            ;
-            FILE* f = fopen(partition, "wb");
-            if (fwrite(data, 1, len, f) != len) {
-                printf("short write writing to %s (%s)\n",
-                       partition, strerror(errno));
+        {
+            size_t start = 0;
+            int success = 0;
+            int fd = open(partition, O_RDWR | O_SYNC);
+            if (fd < 0) {
+                printf("failed to open %s: %s\n", partition, strerror(errno));
                 return -1;
             }
-            if (fclose(f) != 0) {
+            int attempt;
+
+            for (attempt = 0; attempt < 10; ++attempt) {
+                size_t next_sync = start + (1<<20);
+                printf("raw O_SYNC write %s attempt %d start at %d\n", partition, attempt+1, start);
+                lseek(fd, start, SEEK_SET);
+                while (start < len) {
+                    size_t to_write = len - start;
+                    if (to_write > 4096) to_write = 4096;
+
+                    ssize_t written = write(fd, data+start, to_write);
+                    if (written < 0) {
+                        if (errno == EINTR) {
+                            written = 0;
+                        } else {
+                            printf("failed write writing to %s (%s)\n",
+                                   partition, strerror(errno));
+                            return -1;
+                        }
+                    }
+                    start += written;
+                    if (start >= next_sync) {
+                        fsync(fd);
+                        next_sync = start + (1<<20);
+                    }
+                }
+                fsync(fd);
+
+                // drop caches so our subsequent verification read
+                // won't just be reading the cache.
+                sync();
+                int dc = open("/proc/sys/vm/drop_caches", O_WRONLY);
+                write(dc, "3\n", 2);
+                close(dc);
+                sleep(1);
+                printf("  caches dropped\n");
+
+                // verify
+                lseek(fd, 0, SEEK_SET);
+                unsigned char buffer[4096];
+                start = len;
+                size_t p;
+                for (p = 0; p < len; p += sizeof(buffer)) {
+                    size_t to_read = len - p;
+                    if (to_read > sizeof(buffer)) to_read = sizeof(buffer);
+
+                    size_t so_far = 0;
+                    while (so_far < to_read) {
+                        ssize_t read_count = read(fd, buffer+so_far, to_read-so_far);
+                        if (read_count < 0) {
+                            if (errno == EINTR) {
+                                read_count = 0;
+                            } else {
+                                printf("verify read error %s at %d: %s\n",
+                                       partition, p, strerror(errno));
+                                return -1;
+                            }
+                        }
+                        if ((size_t)read_count < to_read) {
+                            printf("short verify read %s at %d: %d %d %s\n",
+                                   partition, p, read_count, to_read, strerror(errno));
+                        }
+                        so_far += read_count;
+                    }
+
+                    if (memcmp(buffer, data+p, to_read)) {
+                        printf("verification failed starting at %d\n", p);
+                        start = p;
+                        break;
+                    }
+                }
+
+                if (start == len) {
+                    printf("verification read succeeded (attempt %d)\n", attempt+1);
+                    success = true;
+                    break;
+                }
+
+                sleep(2);
+            }
+
+            if (!success) {
+                printf("failed to verify after all attempts\n");
+                return -1;
+            }
+
+            if (close(fd) != 0) {
                 printf("error closing %s (%s)\n", partition, strerror(errno));
                 return -1;
             }
+            // hack: sync and sleep after closing in hopes of getting
+            // the data actually onto flash.
+            printf("sleeping after close\n");
+            sync();
+            sleep(5);
             break;
+        }
     }
 
     free(copy);
@@ -471,7 +566,7 @@ int ParseSha1(const char* str, uint8_t* digest) {
 // Search an array of sha1 strings for one matching the given sha1.
 // Return the index of the match on success, or -1 if no match is
 // found.
-int FindMatchingPatch(uint8_t* sha1, char** const patch_sha1_str,
+int FindMatchingPatch(uint8_t* sha1, char* const * const patch_sha1_str,
                       int num_patches) {
     int i;
     uint8_t patch_sha1[SHA_DIGEST_SIZE];
@@ -503,6 +598,7 @@ int applypatch_check(const char* filename,
                "sha1 sums; checking cache\n", filename);
 
         free(file.data);
+        file.data = NULL;
 
         // If the source file is missing or corrupted, it might be because
         // we were killed in the middle of patching it.  A copy of it
@@ -582,6 +678,14 @@ int CacheSizeCheck(size_t bytes) {
     }
 }
 
+static void print_short_sha1(const uint8_t sha1[SHA_DIGEST_SIZE]) {
+    int i;
+    const char* hex = "0123456789abcdef";
+    for (i = 0; i < 4; ++i) {
+        putchar(hex[(sha1[i]>>4) & 0xf]);
+        putchar(hex[sha1[i] & 0xf]);
+    }
+}
 
 // This function applies binary patches to files in a way that is safe
 // (the original file is not touched until we have the desired
@@ -615,8 +719,9 @@ int applypatch(const char* source_filename,
                size_t target_size,
                int num_patches,
                char** const patch_sha1_str,
-               Value** patch_data) {
-    printf("\napplying patch to %s\n", source_filename);
+               Value** patch_data,
+               Value* bonus_data) {
+    printf("patch %s: ", source_filename);
 
     if (target_filename[0] == '-' &&
         target_filename[1] == '\0') {
@@ -631,9 +736,10 @@ int applypatch(const char* source_filename,
 
     FileContents copy_file;
     FileContents source_file;
+    copy_file.data = NULL;
+    source_file.data = NULL;
     const Value* source_patch_value = NULL;
     const Value* copy_patch_value = NULL;
-    int made_copy = 0;
 
     // We try to load the target file into the source_file object.
     if (LoadFileContents(target_filename, &source_file,
@@ -641,8 +747,10 @@ int applypatch(const char* source_filename,
         if (memcmp(source_file.sha1, target_sha1, SHA_DIGEST_SIZE) == 0) {
             // The early-exit case:  the patch was already applied, this file
             // has the desired hash, nothing for us to do.
-            printf("\"%s\" is already target; no patch needed\n",
-                   target_filename);
+            printf("already ");
+            print_short_sha1(target_sha1);
+            putchar('\n');
+            free(source_file.data);
             return 0;
         }
     }
@@ -653,6 +761,7 @@ int applypatch(const char* source_filename,
         // Need to load the source file:  either we failed to load the
         // target file, or we did but it's different from the source file.
         free(source_file.data);
+        source_file.data = NULL;
         LoadFileContents(source_filename, &source_file,
                          RETOUCH_DO_MASK);
     }
@@ -667,6 +776,7 @@ int applypatch(const char* source_filename,
 
     if (source_patch_value == NULL) {
         free(source_file.data);
+        source_file.data = NULL;
         printf("source file is bad; trying copy\n");
 
         if (LoadFileContents(CACHE_TEMP_SOURCE, &copy_file,
@@ -685,16 +795,37 @@ int applypatch(const char* source_filename,
         if (copy_patch_value == NULL) {
             // fail.
             printf("copy file doesn't match source SHA-1s either\n");
+            free(copy_file.data);
             return 1;
         }
     }
 
+    int result = GenerateTarget(&source_file, source_patch_value,
+                                &copy_file, copy_patch_value,
+                                source_filename, target_filename,
+                                target_sha1, target_size, bonus_data);
+    free(source_file.data);
+    free(copy_file.data);
+
+    return result;
+}
+
+static int GenerateTarget(FileContents* source_file,
+                          const Value* source_patch_value,
+                          FileContents* copy_file,
+                          const Value* copy_patch_value,
+                          const char* source_filename,
+                          const char* target_filename,
+                          const uint8_t target_sha1[SHA_DIGEST_SIZE],
+                          size_t target_size,
+                          const Value* bonus_data) {
     int retry = 1;
     SHA_CTX ctx;
     int output;
     MemorySinkInfo msi;
     FileContents* source_to_use;
     char* outname;
+    int made_copy = 0;
 
     // assume that target_filename (eg "/system/app/Foo.apk") is located
     // on the same filesystem as its top-level directory ("/system").
@@ -723,7 +854,7 @@ int applypatch(const char* source_filename,
 
             // We still write the original source to cache, in case
             // the partition write is interrupted.
-            if (MakeFreeSpaceOnCache(source_file.size) < 0) {
+            if (MakeFreeSpaceOnCache(source_file->size) < 0) {
                 printf("not enough free space on /cache\n");
                 return 1;
             }
@@ -740,8 +871,10 @@ int applypatch(const char* source_filename,
                 enough_space =
                     (free_space > (256 << 10)) &&          // 256k (two-block) minimum
                     (free_space > (target_size * 3 / 2));  // 50% margin of error
-                printf("target %ld bytes; free space %ld bytes; retry %d; enough %d\n",
-                       (long)target_size, (long)free_space, retry, enough_space);
+                if (!enough_space) {
+                    printf("target %ld bytes; free space %ld bytes; retry %d; enough %d\n",
+                           (long)target_size, (long)free_space, retry, enough_space);
+                }
             }
 
             if (!enough_space) {
@@ -763,7 +896,7 @@ int applypatch(const char* source_filename,
                     return 1;
                 }
 
-                if (MakeFreeSpaceOnCache(source_file.size) < 0) {
+                if (MakeFreeSpaceOnCache(source_file->size) < 0) {
                     printf("not enough free space on /cache\n");
                     return 1;
                 }
@@ -776,16 +909,16 @@ int applypatch(const char* source_filename,
                 unlink(source_filename);
 
                 size_t free_space = FreeSpaceForFile(target_fs);
-                printf("(now %ld bytes free for target)\n", (long)free_space);
+                printf("(now %ld bytes free for target) ", (long)free_space);
             }
         }
 
         const Value* patch;
         if (source_patch_value != NULL) {
-            source_to_use = &source_file;
+            source_to_use = source_file;
             patch = source_patch_value;
         } else {
-            source_to_use = &copy_file;
+            source_to_use = copy_file;
             patch = copy_patch_value;
         }
 
@@ -817,7 +950,7 @@ int applypatch(const char* source_filename,
             strcpy(outname, target_filename);
             strcat(outname, ".patch");
 
-            output = open(outname, O_WRONLY | O_CREAT | O_TRUNC);
+            output = open(outname, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
             if (output < 0) {
                 printf("failed to open output file %s: %s\n",
                        outname, strerror(errno));
@@ -841,7 +974,7 @@ int applypatch(const char* source_filename,
         } else if (header_bytes_read >= 8 &&
                    memcmp(header, "IMGDIFF2", 8) == 0) {
             result = ApplyImagePatch(source_to_use->data, source_to_use->size,
-                                     patch, sink, token, &ctx);
+                                     patch, sink, token, &ctx, bonus_data);
         } else {
             printf("Unknown patch file format\n");
             return 1;
@@ -872,6 +1005,10 @@ int applypatch(const char* source_filename,
     if (memcmp(current_target_sha1, target_sha1, SHA_DIGEST_SIZE) != 0) {
         printf("patch did not produce expected sha1\n");
         return 1;
+    } else {
+        printf("now ");
+        print_short_sha1(target_sha1);
+        putchar('\n');
     }
 
     if (output < 0) {
